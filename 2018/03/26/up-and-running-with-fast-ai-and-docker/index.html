@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en-US">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+
+		
+		<title>Up and Running With Fast.ai and Docker &middot; The Future Has Arrived</title>
+		
+
+		
+			
+		
+
+		
+
+		
+		
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+		
+
+		<link rel="stylesheet" href="../../../../font-awesome/css/font-awesome.min.css" type="text/css">
+		<link rel="stylesheet" href="../../../../css/poole.css">
+		<link rel="stylesheet" href="../../../../css/syntax.css">
+		<link rel="stylesheet" href="../../../../css/hyde.css">
+		
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="The Future Has Arrived">
+		<link href="../../../../2018/03/26/up-and-running-with-fast-ai-and-docker" rel="canonical">
+	</head>
+
+	<body class="  h-entry">
+		<main class="content container" role="main">
+			<article class="post">
+				<header>
+					<a class="u-url" href="../../../../2018/03/26/up-and-running-with-fast-ai-and-docker">
+						<h1 class="post-title p-name">Up and Running With Fast.ai and Docker</h1>
+					</a>
+					<time class="post-date dt-published" datetime="2018-03-26T00:00:00Z">Monday, 26 March 2018</time>
+				</header>
+				<main class="post-content e-content">
+					
+
+<p>Last Monday marked the start of the latest series of Fast.ai courses: <em>Cutting Edge Deep Learning For Coders</em>. If you have an interest in data science and haven’t heard of Fast.ai, you should check them out. Fast.ai is a community started by Jeremy Howard and Rachael Thomas in 2016. It now includes an impressive set of courses and a machine learning library by the same name. What sets them apart is their practical no nonsense approach to solving data science problems by example. In this post, I’m sharing two docker files which provide a data science environment based on the Fast.ai library, as well some tips for getting up and running with docker quickly.</p>
+
+<h3 id="why-docker">Why Docker?</h3>
+
+<p>Docker provides a software layer that sits above the operating system to support containerization. Virtual machines have been around for years but docker is more lightweight. With the development of Nvidia-Docker, GPU support is baked into the docker environment.</p>
+
+<p>Three reasons you might want to use docker for data science are:</p>
+
+<p><strong>Plug and Play:</strong> Once you&rsquo;ve installed the Nvidia-Docker server on your host machine, you run a docker image to create a container. There are thousands of docker images pre-build by companies like Nvidia with software like CUDA already installed. Once you have the image you need, you’re ready to go.</p>
+
+<p><strong>Easy Configuration:</strong> Your docker image is based on a docker file which is a script for building the container. Adding or removing software is as easy as modifying the docker file and rebuilding the image. From the docker file you can also import an existing image and add to it using the FROM command (see the <em>Docker Files</em> section below for details)</p>
+
+<p><strong>Containerization:</strong> Because the docker container separates your operational software environment from the host operating system, you get the benefits of containerization. There are lots of benefits to containerization, but the one I really like is the capability to manage potential software conflicts or dependency issues at the container level without permanently changing the operating system. If things get ugly you can erase the docker image as if it never existed.</p>
+
+<h3 id="caveats">Caveats</h3>
+
+<p>Docker doesn&rsquo;t run natively on Windows or OSX. To use docker with these platforms you need to introduce an additional layer of virtualization, such as <a href="http://boot2docker.io/">boot2docker</a>. Docker containers also need root privileges to run, which may pose security issues in some corporate settings.</p>
+
+<h3 id="installation-on-host">Installation on Host</h3>
+
+<p>The homepage for <a href="https://github.com/NVIDIA/nvidia-docker">Nvidia-Docker</a> provides a useful starting point for installing the software on your host machine. There are also many tutorials online providing guides for the various flavors of linux and other operating systems. Nvidia-Docker provides an additional layer on top of the core docker installation. This layer interfaces with the Nvidia drivers on the host which control the GPU hardware. The Nvidia driver version on the host machine will determine the version of CUDA you can run in the container. Once you know the driver version you have on the host, you can check the compatible CUDA version <a href="https://github.com/NVIDIA/nvidia-docker/wiki/CUDA#requirements">here</a>.</p>
+
+<h3 id="docker-files">Docker Files</h3>
+
+<p>The repo contains two docker files</p>
+
+<ol>
+<li>fastai.latest.cuda8</li>
+<li>fastai.latest.cuda9</li>
+</ol>
+
+<p>You can access the docker files here. The docker files support nvidia-docker for versions 8 and 9 of cuda respectively. There are two differences between the files:</p>
+
+<ol>
+<li><p>The cuda 8 version inherits from an ubuntu16.04 image with CUDA 8 installed whereas the cuda 9 version has cuda 9 installed. Both images are sourced from NVIDIA.</p>
+
+<pre><code>FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04
+</code></pre>
+
+<pre><code>FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
+</code></pre></li>
+
+<li><p>The cuda 8 version installs the cuda80 python package rather than the cuda90 package for version 9. The Fastai python environment is created from the environment.yml file included in the Fastai github repository. To support cuda 8, we replace the cuda90 python package provided in environment.yml with the cuda80 package:</p></li>
+</ol>
+
+<pre><code>#           FASTAI
+
+# clone fastai repo
+RUN git clone https://github.com/fastai/fastai.git /usr/local/fastai
+
+# replace cuda90 package with cuda80 for host machines supporting cuda8
+RUN sed -i -e 's/cuda90/cuda80/' /usr/local/fastai/environment.yml
+
+</code></pre>
+
+<p>When run, the docker container automatically starts the Jupyter Notebook server with a default password: fastai.</p>
+
+<p>If you need to change the password, refer to the section of the docker file titled Start Up :</p>
+
+<ol>
+<li>run the code below in a Jupyter Notebook to generate a new password key
+<code>from notebook.auth import passwd; passwd()</code></li>
+<li>update the key in the docker file
+<code>NotebookApp.password='sha1:a60ff295d0b9:506732d050d4f50bfac9b6d6f37ea6b86348f4ed'&quot;</code></li>
+<li>rebuild the docker file. (refer to the Docker Quickstart Commands section below)</li>
+</ol>
+
+<pre><code>#           START UP
+
+# start jupyter server specifying password: fastai
+# in jupyter notebook run the following to generate custom password key and update --NotebookApp.password=
+# from notebook.auth import passwd; passwd()
+
+CMD /bin/bash -c &quot;source activate fastai &amp;&amp; jupyter notebook --allow-root --no-browser --NotebookApp.password='sha1:a60ff295d0b9:506732d050d4f50bfac9b6d6f37ea6b86348f4ed'&quot;
+
+</code></pre>
+
+<h3 id="docker-quickstart-commands">Docker Quickstart Commands</h3>
+
+<p>You&rsquo;ll find a full command line reference at <a href="https://docs.docker.com/engine/reference/commandline/docker/#child-commands">docker.com</a>. Don&rsquo;t be overwhelmed by the number of commands. Chances are you&rsquo;ll only need to remember a handful of them.</p>
+
+<p><a href="https://docs.docker.com/engine/reference/commandline/build/"><strong>docker build:</strong></a> Builds an image from a docker file.</p>
+
+<p><em>Example</em></p>
+
+<pre><code># Arguments
+# ---------
+# -f path to local docker file 
+# -t tag(name) of new image
+# . passes the current directory as the build context
+
+cd /home/nick/docker/ml/ml-gpu/; 
+docker build -f /home/nick/docker/ml/ml-gpu/fastai.latest.cuda9 -t ireland/fastai.cuda9:latest . 
+</code></pre>
+
+<p><a href="https://docs.docker.com/engine/reference/commandline/run/"><strong>docker run:</strong></a> Runs a container (created from an image if it doesn&rsquo;t yet exist).</p>
+
+<p><em>Example</em></p>
+
+<pre><code># Here we run a container without passing in additional commands. 
+# The fast.ai containers start a Jupyter Notebook server that runs in the background
+
+# Arguments
+# ---------
+# --rm remove existing container if it exists
+# -d detach from the terminal
+# --name assign a name to the new container
+# -p map port 8888 on the host to 8888 in the container
+# -v map file path /home/nick on the host to /home in the container
+# ireland/fastai:2.1 the docker image to start
+
+nvidia-docker run --rm -d --name fastai -p 8888:8888 -v /home/nick:/home -v /home/nick/data:/data ireland/fastai:2.1
+</code></pre>
+
+<p><a href="https://docs.docker.com/engine/reference/commandline/exec/"><strong>docker exec</strong></a> Run a command in a running docker container.</p>
+
+<p><em>Example</em></p>
+
+<pre><code># Attach current command window to a running docker container. 
+# This allows us to control the running container from the command window
+# Arguments
+# -i interactive mode
+# -t allocate a terminal to the container
+# fastai (container name)
+# bash (command to run)
+
+docker exec -it fastai bash
+</code></pre>
+
+<p><a href="https://docs.docker.com/engine/reference/commandline/images/"><strong>docker images</strong>:</a> List docker images</p>
+
+<p><a href="https://docs.docker.com/engine/reference/commandline/ps/"><strong>docker ps</strong>:</a> List running docker containers</p>
+
+<p><a href="https://docs.docker.com/engine/reference/commandline/system_df/"><strong>docker system df:</strong></a> Show docker disk usage</p>
+
+<p><a href="https://docs.docker.com/engine/reference/commandline/system_prune/"><strong>docker system prune:</strong></a> Purges any stopped containers, the build cache and dangling images. A dangling image occurs when you rebuild an image without assigning a new name. The old version is kept and continues to take up disk space.</p>
+
+<h3 id="customize-docker-image">Customize Docker Image</h3>
+
+<p>In the course of experimentation you will probably discover the need for additional python package or software tool. Here are two simple examples of how you can modify the docker file to include new python packages.</p>
+
+<p><strong>Using Conda</strong></p>
+
+<pre><code># install packages: numpy-index 
+# add the following before the cleanup section of the dockerfile
+RUN /bin/bash -c &quot;source activate fastai &amp;&amp; conda install -y numpy-indexed&quot;
+</code></pre>
+
+<p><strong>Install From Source</strong></p>
+
+<pre><code># ML-From-Scratch
+RUN git clone https://github.com/eriklindernoren/ML-From-Scratch /usr/local/ML-From-Scratch
+RUN cd /usr/local/ML-From-Scratch &amp;&amp; /bin/bash -c &quot;source activate fastai &amp;&amp; python setup.py install&quot;
+</code></pre>
+
+<h3 id="summary">Summary</h3>
+
+<p>To get started there are 5 steps you need follow:</p>
+
+<ol>
+<li>Install Nvidia-Docker on your host machine.</li>
+<li>Download the docker file you need</li>
+<li>Build the docker file
+<code>
+cd &lt;path to dockerfile&gt;; docker build -f &lt;path to dockerfile&gt; -t &lt;img name&gt; . 
+</code></li>
+
+<li><p>Run the docker image</p>
+
+<pre><code>nvidia-docker run --rm -d --name fastai -p 8888:8888 -v &lt;host workspace path&gt;:/home -v &lt;host data path&gt;:/data &lt;img name&gt;
+</code></pre>
+
+<ol>
+<li>In your web browser, navigate to localhost:8888 to access the Jupyter environment</li>
+</ol></li>
+</ol>
+
+				</main>
+				<footer class="footer">
+					
+					
+				</footer>
+			</article>
+		</main>
+				<aside class="sidebar">
+			<div class="container sidebar-sticky">
+				<header class="sidebar-about h-card vcard p-author">
+					
+					<a class="u-url u-uid" rel="me" href="../../../../">
+						<img class="u-photo" src="../../../../author.jpg" width=128 height=128 />
+					</a>
+					
+
+					
+					<span class="site-title u-name fn">
+					  <a class="u-url u-uid" rel="me" href="../../../../">The Future Has Arrived</a>
+				  </span>
+					
+
+					<p class="lead p-note">
+						 data science, behavioural finance and the rise of machines 
+					</p>
+
+					<nav>
+						<ul class="sidebar-nav">
+							
+							<li><a href="../../../../post/"> Posts </a></li>
+							
+							<li><a href="../../../../2018/03/26/up-and-running-with-fast-ai-and-docker/"> Up and Running With Fast.ai and Docker </a></li>
+							
+						</ul>
+					</nav>
+
+					
+						<aside class="contact">
+						  
+							  <h3 class="contact-head">Contact Me</h3>
+						  
+							<ul class="contact-list">
+								
+								<li>
+									
+									  
+		  						    <i class='fa fa-github fa-fw'></i>
+		  						  
+		  							<a href="https://github.com/nji-syd" class="u-url url" rel="me">
+		  							  GitHub
+		  							</a>
+								
+								</li>
+								
+								<li>
+									
+									  
+		  						    <i class='fa fa-linkedin fa-fw'></i>
+		  						  
+		  							<a href="https://linkedin.com/in/nickirelandau" class="u-url url" rel="me">
+		  							  LinkedIn
+		  							</a>
+								
+								</li>
+								
+							</ul>
+						</aside>
+					
+				</header>
+
+				<footer>&copy; 2018. All rights reserved. </footer>
+			</div>
+		</aside>
+
+		  <footer>
+  
+  
+  
+  
+
+  <script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+  
+  
+  
+  <script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+  <script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+  <script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+  
+
+ 
+  
+
+  
+  </footer>
+  </body>
+</html>
+
+	</body>
+</html>
