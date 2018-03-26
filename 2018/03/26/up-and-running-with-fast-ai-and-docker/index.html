@@ -24,21 +24,21 @@
 
 		
 
-		<link rel="stylesheet" href="../../../../font-awesome/css/font-awesome.min.css" type="text/css">
+		<link rel="stylesheet" href="https://nji-syd.github.io/font-awesome/css/font-awesome.min.css" type="text/css">
 		<link rel="stylesheet" href="../../../../css/poole.css">
 		<link rel="stylesheet" href="../../../../css/syntax.css">
 		<link rel="stylesheet" href="../../../../css/hyde.css">
 		
 		
 		<link href="" rel="alternate" type="application/rss+xml" title="The Future Has Arrived">
-		<link href="../../../../2018/03/26/up-and-running-with-fast-ai-and-docker" rel="canonical">
+		<link href="https://nji-syd.github.io/2018/03/26/up-and-running-with-fast-ai-and-docker" rel="canonical">
 	</head>
 
 	<body class="  h-entry">
 		<main class="content container" role="main">
 			<article class="post">
 				<header>
-					<a class="u-url" href="../../../../2018/03/26/up-and-running-with-fast-ai-and-docker">
+					<a class="u-url" href="https://nji-syd.github.io/2018/03/26/up-and-running-with-fast-ai-and-docker">
 						<h1 class="post-title p-name">Up and Running With Fast.ai and Docker</h1>
 					</a>
 					<time class="post-date dt-published" datetime="2018-03-26T00:00:00Z">Monday, 26 March 2018</time>
@@ -159,9 +159,9 @@ docker build -f /home/nick/docker/ml/ml-gpu/fastai.latest.cuda9 -t ireland/fasta
 # --name assign a name to the new container
 # -p map port 8888 on the host to 8888 in the container
 # -v map file path /home/nick on the host to /home in the container
-# ireland/fastai:2.1 the docker image to start
+# ireland/fastai.cuda9:latest the docker image to start
 
-nvidia-docker run --rm -d --name fastai -p 8888:8888 -v /home/nick:/home -v /home/nick/data:/data ireland/fastai:2.1
+nvidia-docker run --rm -d --name fastai -p 8888:8888 -v /home/nick:/home -v /home/nick/data:/data ireland/fastai.cuda9:latest
 </code></pre>
 
 <p><a href="https://docs.docker.com/engine/reference/commandline/exec/"><strong>docker exec</strong></a> Run a command in a running docker container.</p>
@@ -238,14 +238,14 @@ RUN cd /usr/local/ML-From-Scratch &amp;&amp; /bin/bash -c &quot;source activate 
 			<div class="container sidebar-sticky">
 				<header class="sidebar-about h-card vcard p-author">
 					
-					<a class="u-url u-uid" rel="me" href="../../../../">
-						<img class="u-photo" src="../../../../author.jpg" width=128 height=128 />
+					<a class="u-url u-uid" rel="me" href="https://nji-syd.github.io/">
+						<img class="u-photo" src="https://nji-syd.github.io/author.jpg" width=128 height=128 />
 					</a>
 					
 
 					
 					<span class="site-title u-name fn">
-					  <a class="u-url u-uid" rel="me" href="../../../../">The Future Has Arrived</a>
+					  <a class="u-url u-uid" rel="me" href="https://nji-syd.github.io/">The Future Has Arrived</a>
 				  </span>
 					
 
