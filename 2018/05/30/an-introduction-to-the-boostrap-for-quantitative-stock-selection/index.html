@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en-US">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+
+		
+		<title>An Introduction To The Boostrap For Quantitative Stock Selection &middot; The Future Has Arrived</title>
+		
+
+		
+			
+		
+
+		
+
+		
+		
+
+		
+
+		<link rel="stylesheet" href="../../../../font-awesome/css/font-awesome.min.css" type="text/css">
+		<link rel="stylesheet" href="../../../../css/poole.css">
+		<link rel="stylesheet" href="../../../../css/syntax.css">
+		<link rel="stylesheet" href="../../../../css/hyde.css">
+		
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="The Future Has Arrived">
+		<link href="../../../../2018/05/30/an-introduction-to-the-boostrap-for-quantitative-stock-selection" rel="canonical">
+	</head>
+
+	<body class="  h-entry">
+		<main class="content container" role="main">
+			<article class="post">
+				<header>
+					<a class="u-url" href="../../../../2018/05/30/an-introduction-to-the-boostrap-for-quantitative-stock-selection">
+						<h1 class="post-title p-name">An Introduction To The Boostrap For Quantitative Stock Selection</h1>
+					</a>
+					<time class="post-date dt-published" datetime="2018-05-30T00:00:00Z">Wednesday, 30 May 2018</time>
+				</header>
+				<main class="post-content e-content">
+					<p>Quantifying uncertainty is a fundamental and challenging task in financial modelling. In this post we’ll look at the bootstrap technique and how it can be applied to quantitative models. More generally, the bootstrap lies at the heart of a statistical technique know as Bootstap Aggregation (also known as bagging), which is the basis for machine learning algorithms such as random forest. We’ll look at Bagging in greater detail in the next post.</p>
+<p><img src="https://lh3.googleusercontent.com/BkRlGAPrNJsVXBBFAkgYmOMgA0Icm3eOMgl_VOh8xvnMunkuv4zzxblOlt2UECAJ4GueU_HQONbStw" /></p>
+<div id="the-bootstrap" class="section level3">
+<h3>The Bootstrap</h3>
+<p>As an undergraduate I found statistics a grind, obscured by a deluge of mathematical formulas and jargon. But it needn’t be that way. The bootstrap is an empirical approach to inference which is both easy to use and free of many of the assumptions inherent in traditional parametric methods. The Bootstrap was developed by Bradley Efron in 1979. Here is an excerpt from Efron and Tibshirani’s excellent book, <em>An Introduction to the Bootstrap</em></p>
+<blockquote>
+<p>Statistics is the science of learning from experience, especially
+experience that arrives a little bit at a time. The earliest
+information science was statistics, originating in about 1650.</p>
+<p>Most people are not natural-born staticians. Left to our own devices
+we are not very good at picking out patterns from a sea of noisy data.
+To put it another way, we are all too good at picking out non-existent
+patterns that happen to suit our purposes. Statistical theory attacks
+the problem from both ends. It provides optimal methods for finding a
+real signal in a noisy background, and also provides strict checks
+against the overinterpretation of random patterns</p>
+<p>The explanations that we will give for the bootstrap, and other
+computer-based methods, involve explanations of traditional ideas in
+statistical inference. The basic ideas of statistics haven’t changed,
+but their implementation has. The modern computer lets us apply these
+ideas flexibly, quickly, easily and with a minimum of mathematical
+assumptions.</p>
+</blockquote>
+<p>The bootstrap is primarily a tool for uncertainty estimation. We might want to explore the uncertainty around a specific model, or compare the relative uncertainty of two or more models. As with any kind of financial risk analysis, the results are only as good as the assumptions on which they are based. If the data generating process is non-stationary, the results will be unreliable.</p>
+<p>If we think about the historical performance of a stock portfolio, we have a empirical distribution of returns. We might want to infer metrics from the data, perhaps the annualized return, Sharpe ratio, or maximum drawdown of the portfolio. Statistically speaking, the true value of these quantities are unknown. If that sounds a little abstract, the example below will hopefully make things clearer. Then we will look to how the bootstrap allows for the estimation of confidence levels in the observations we have.</p>
+</div>
+<div id="dice-example" class="section level3">
+<h3>Dice Example</h3>
+<p>Suppose we roll a dice 12 times. The dice has 6 sides so we know the chance of any outcome is 1/6. But suppose we didn’t know this, and we want to estimate the true probability from the empirical data. Suppose we roll:</p>
+<p>5,4,5,3,3,6,4,5,4,1,3,6</p>
+<p>The true and empirical distribution can be summarized as follows:</p>
+<p><em>Table 1: True and Observed Dice Probabilities</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>Value Rolled</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>True Probability</td>
+<td>2/12</td>
+<td>2/12</td>
+<td>2/12</td>
+<td>2/12</td>
+<td>2/12</td>
+<td>2/12</td>
+</tr>
+<tr class="even">
+<td>Observed Probability</td>
+<td>1/12</td>
+<td>0/12</td>
+<td>3/12</td>
+<td>3/12</td>
+<td>3/12</td>
+<td>2/12</td>
+</tr>
+</tbody>
+</table>
+<p>Let’s denote the true probability distribution <span class="math inline">\(F\)</span> and the observed distribution <span class="math inline">\(F^*\)</span></p>
+<p>We know the true mean <span class="math inline">\(\mu\)</span> of the distribution of dice rolls <span class="math inline">\(F\)</span> is equal to:</p>
+<p><span class="math inline">\(=x_1*p(x_1) +\)</span> <span class="math inline">\(x_2*p(x_2) +\)</span> <span class="math inline">\(x_3*p(x_3) +\)</span> <span class="math inline">\(x_4*p(x_4) +\)</span> <span class="math inline">\(x_5*p(x_5) +\)</span> <span class="math inline">\(x_6*p(x_6)\)</span></p>
+<p><span class="math inline">\(=1 * 1/6 +\)</span> <span class="math inline">\(2* 1/6 +\)</span> <span class="math inline">\(3* 1/6 +\)</span> <span class="math inline">\(4* 1/6 +\)</span> <span class="math inline">\(5* 1/6 +\)</span> <span class="math inline">\(6* 1/6\)</span></p>
+<p><span class="math inline">\(= (1+2+3+4+5+6)/6\)</span></p>
+<p><span class="math inline">\(= 3.5\)</span></p>
+<p>Where p is the true probability for <span class="math inline">\(F\)</span>. But we are pretending we don’t know the true distribution, rather all we know is the empiricle distribution <span class="math inline">\(F^*\)</span>. The empirical mean <span class="math inline">\(\overline{x}\)</span> from Table 1 is:</p>
+<p><span class="math inline">\(=x_1*p(x_1) +\)</span> <span class="math inline">\(x_2*p(x_2) +\)</span> <span class="math inline">\(x_3*p(x_3) +\)</span> <span class="math inline">\(x_4*p(x_4) +\)</span> <span class="math inline">\(x_5*p(x_5) +\)</span> <span class="math inline">\(x_6*p(x_6)\)</span></p>
+<p><span class="math inline">\(=1 * 1/12 +\)</span> <span class="math inline">\(2* 0 +\)</span> <span class="math inline">\(3* 3/12 +\)</span> <span class="math inline">\(4* 3/12 +\)</span> <span class="math inline">\(5* 3/12 +\)</span> <span class="math inline">\(6* 1/6\)</span></p>
+<p><span class="math inline">\(= 4.08\)</span></p>
+<p>Which is just the mean of sample:</p>
+<p><span class="math inline">\(=\dfrac{5,4,5,3,3,6,4,5,4,1,3,6}{12}\)</span></p>
+<p><span class="math inline">\(= 4.08\)</span></p>
+<p>The bootstrap allows us to asses confidence in the sample mean of 4.08. Let’s see how.</p>
+</div>
+<div id="the-bootstrap-process" class="section level3">
+<h3>The Bootstrap Process</h3>
+<p>We start by sampling the observed data <span class="math inline">\(F^*\)</span> with replacement <span class="math inline">\(n\)</span> times, where <span class="math inline">\(n\)</span> is the size of the sample (in this case 12 because the dice was rolled 12 times). Let’s denote the observed sample as <span class="math inline">\(x\)</span>, the first bootstrap sample as <span class="math inline">\(x{^*_1}\)</span>, and the mean of the first bootstrap sample <span class="math inline">\(\overline{x{^*_1}}\)</span></p>
+<p><span class="math inline">\(x\)</span>: 5,4,5,3,3,6,4,5,4,1,3,6</p>
+<p><span class="math inline">\(x{^*_1}\)</span>: 5,5,3,3,4,6,3,4,3,1,6,4</p>
+<p><span class="math inline">\(\overline{x{^*_1}}\)</span> <span class="math inline">\(=\)</span> <span class="math inline">\(3.92\)</span></p>
+<p>Now we repeat the sampling process many times. To keep things simple, we’ll resample just 20 times. In practice we might choose 1000x.</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(x{^*_1}\)</span>: 5,5,3,3,4,6,3,4,3,1,6,4</td>
+<td><span class="math inline">\(x{^*_2}\)</span>: 3,4,3,3,3,3,6,3,1,5,5,3</td>
+<td><span class="math inline">\(x{^*_3}\)</span>: 4,3,1,4,5,3,5,4,3,5,6,3</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(x{^*_4}\)</span>: 5,6,6,4,1,4,5,4,4,4,5,5</td>
+<td><span class="math inline">\(x{^*_5}\)</span>: 4,5,4,4,5,5,3,5,5,6,5,4</td>
+<td><span class="math inline">\(x{^*_6}\)</span>: 4,4,4,3,6,6,5,5,5,6,5,4</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(x{^*_7}\)</span>: 5,6,6,5,3,3,6,3,3,5,3,5</td>
+<td><span class="math inline">\(x{^*_8}\)</span>: 5,3,4,5,6,3,6,5,3,5,6,5</td>
+<td><span class="math inline">\(x{^*_9}\)</span>: 6,1,6,3,6,4,3,5,3,3,5,3</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(x{^*_{10}}\)</span>: 4,5,6,5,5,5,3,3,5,4,6,5</td>
+<td><span class="math inline">\(x{^*_{11}}\)</span>: 4,6,4,4,5,5,3,4,3,3,4,4</td>
+<td><span class="math inline">\(x{^*_{12}}\)</span>: 5,4,5,3,4,4,5,1,5,3,5,6</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(x{^*_{13}}\)</span>: 3,6,4,4,6,5,4,5,6,5,6,4</td>
+<td><span class="math inline">\(x{^*_{14}}\)</span>: 5,6,6,3,3,4,1,3,4,6,3,4</td>
+<td><span class="math inline">\(x{^*_{15}}\)</span>: 6,1,1,3,5,3,6,3,5,1,4,5</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(x{^*_{16}}\)</span>: 3,3,5,3,5,6,1,3,1,5,5,6</td>
+<td><span class="math inline">\(x{^*_{17}}\)</span>: 6,1,6,4,6,3,6,5,6,3,5,3</td>
+<td><span class="math inline">\(x{^*_{18}}\)</span>: 1,3,3,3,5,3,3,3,6,4,6,4</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(x{^*_{19}}\)</span>: 4,4,6,6,5,5,3,4,1,5,3,5</td>
+<td><span class="math inline">\(x{^*_{20}}\)</span>: 4,4,3,5,4,5,3,5,4,4,3,5</td>
+</tr>
+</tbody>
+</table>
+<p>And here is where it gets interesting. Any statistic <span class="math inline">\(u\)</span> we calculate on <span class="math inline">\(x\)</span> (in this case the mean), we can also calculate on <span class="math inline">\(x^*\)</span>. <em>It turns out the empirical bootstrap is able to approximate the variation in <span class="math inline">\(u\)</span> via the variation in <span class="math inline">\(u^*\)</span></em>. In this case <span class="math inline">\(u\)</span> is the mean, but it might also be the variance or Sharpe ratio. To do this we calculate:</p>
+<p><span class="math inline">\(\delta\)</span> <span class="math inline">\(=\)</span> <span class="math inline">\(\overline{x^*}\)</span> <span class="math inline">\(-\)</span> <span class="math inline">\(\overline{x}\)</span></p>
+<p>For the first sample we have:</p>
+<p><span class="math inline">\(\delta^*_1\)</span> <span class="math inline">\(=\)</span> <span class="math inline">\(3.92\)</span> <span class="math inline">\(-\)</span> <span class="math inline">\(4.08\)</span></p>
+<p><span class="math inline">\(\space\space\thinspace\thinspace\)</span> <span class="math inline">\(=\)</span> <span class="math inline">\(-0.16\)</span></p>
+<p>For the 20 resamples above we have:</p>
+<p><span class="math inline">\(\delta^*\)</span> <span class="math inline">\(=\)</span>-0.16 -0.58 -0.25 0.34 0.50 0.67 0.34 0.59 -0.08 0.59 0.00 0.09 0.75 -0.08 -0.50 -0.25 0.42 -0.41 0.17 0.00</p>
+<p>The deltas <span class="math inline">\(\delta^*\)</span> provide a non parametric estimate of the distribution of our observed sample statistic <span class="math inline">\(\overline{x}\)</span> around the true statistic <span class="math inline">\(\mu\)</span>, even though we don’t know the true value of <span class="math inline">\(\mu\)</span><span class="math inline">\(^{1}\)</span>. We have 20 values, so each value approximates 5% of the probability distribution. We estimate the 90% confidence interval by adding the 1st and 20th ordered values to the sample mean.</p>
+<p>[ 4.08-.58 &lt; <span class="math inline">\(x\)</span> &lt; 4.08+.75 ]</p>
+<p><span class="math inline">\(\space\space\space\space\space\)</span>[ 3.50 &lt; <span class="math inline">\(x\)</span> &lt; 4.83 ]</p>
+<p>In this case the true value 3.5, lies on the lower confidence interval. Here we used only 20 resamples to keep it simple, but to get good confidence estimates we would have used many more resamples.</p>
+<p>Finally it’s worth noting that the bootstrap didn’t improve upon the sample estimate of 4.08 for the mean of the dice, it only helped estimate the uncertainty of it. You’ll also recall that we only rolled the dice 12 times. This is the root cause of our rather poor estimate <span class="math inline">\(\overline{x}=\)</span> 4.08 and considerable uncertainty. Increasing the sample size of 12 will improve the estimate <span class="math inline">\(u\)</span> <span class="math inline">\(=\)</span> <span class="math inline">\(\overline{x}\)</span>. In doing so, the bootstrap sample size will also be larger resulting in tighter confidence intervals.</p>
+</div>
+<div id="a-financial-model" class="section level3">
+<h3>A Financial Model</h3>
+<p>Suppose we have a model for scoring stocks. We’ve backtested the model by applying it to some universe of stocks over some historical time frame. Specifically, each month we sort all stocks in the universe into 10 equal sized portfolios according to our scoring model, and then track the returns for the next month.</p>
+<p>Below are the results for a multi factor model utilizing Quality, Value and Growth (QVG) factors. The model was applied to the 3000 most liquid stocks in the United States over the 13 year period January 2000 - December 2012 (in-sample period):</p>
+<div id="figure-one---annualized-decile-returns-qvg-model-in-sampleannualized-decile-returns-qvg-model" class="section level4">
+<h4>Figure One - Annualized Decile Returns QVG Model (In-Sample)<img src="https://lh3.googleusercontent.com/TOpvFBoC4658BdL0yOxJ7F1Oyi-U-HgJgclml8Ua3nzAFp8Ju6ui8hwkfLZymIec0crc3YIGiZAXGw" title="Annualized Decile Returns QVG Model" alt="Annualized Decile Returns QVG Model" /></h4>
+<p><br>
+Figure One shows the annualized return for each of the ten portfolios over the in-sample period. The portfolios are ordered from the group with the top decile of model scores each month (far left), to the group with the bottom decile of model scores each month (far right).</p>
+<p>Figure Two shows the performance of the top decile portfolio through time. The large drawdown in the middle corresponds to the Global Financial Crisis period. Over the sample period the portfolio had a Sharpe Ratio of 0.58<span class="math inline">\(^{2}\)</span>. Before we proceed to uncertainty estimates there’s one more consideration, which we’ll address next.</p>
+</div>
+<div id="figure-two---top-decile-cumulative-return-top-decile-equity-curve" class="section level4">
+<h4>Figure Two - Top Decile Cumulative Return <img src="https://lh3.googleusercontent.com/eQ6-L2hrLDyUMI2EprxjYy9fEnuHtyavl9wi8JYwdGJuPqXkavd8ineopUrk2n7O6nlfXQugTGZh-w" title="Top Decile Equity Curve" alt="Top Decile Equity Curve" width="800" /></h4>
+</div>
+</div>
+<div id="bootstraping-timeseries" class="section level3">
+<h3>Bootstraping Timeseries</h3>
+<p>Timeseries problems introduce an additional challenge due to the potential for autocorrelation. The standard bootstrap assumes the ordering of the samples makes no difference, that is the samples are independent. However we can use a technique known as the block bootstrap to handle autocorrelation. There are a number of variants to the block bootstrap<span class="math inline">\(^3\)</span>, but all are based on the idea of capturing dependency structure in the timeseries by sampling chunks or blocks of the observed sample at a time.</p>
+<p>One methodology which we’ll adopt here is know as the <em>Circular Block Bootstrap</em> (CBB). CBB creates blocks of consecutive data point equal to the block size <span class="math inline">\(b\)</span>, wrapping the samples at the end of the timeseries with those at the beginning. For example, consider a toy sample of 6 data points (A -&gt; F):</p>
+<p>A, B, C, D, E, F</p>
+<p>CBB samples are shown below for a block size of 3. Rather than sampling 6 points independently from the original sample, the CBB samples 2 blocks independently.</p>
+<table>
+<tbody>
+<tr class="odd">
+<td>A,B,C</td>
+<td>B,C,D</td>
+<td>C,D,E</td>
+<td>D,E,F</td>
+<td>E,F,A</td>
+<td>F,A,B</td>
+</tr>
+</tbody>
+</table>
+<p>OK. Now lets look at the distribution of Sharpe ratios for the QVG model over the 13 year period. Below we use 1000 bootstrap samples with a block length of 12 (returns are monthly so the block length is 12 months). The observed Sharpe ratio and 90% confidence intervals are shown.</p>
+<div id="figure-three---distribution-of-sharpe-ratio---13-years-to-dec-2012-in-sample" class="section level4">
+<h4>Figure Three - Distribution of Sharpe Ratio - 13 years to Dec-2012 (In Sample)</h4>
+<p><img src="https://lh3.googleusercontent.com/G1LItntEKMngxdRrwi7xEDOra_CzT8-TruaFr_uzX4JtGiF4ZXTFOAbQijUhCocS5bBpVIW-fAVBvw" title="Distribution of Sharpe Ratios (In Sample)" width="800" /></p>
+<p>For the Sharpe ratio the 90% intervals are [0.14, 1.2]. The distribution is clearly skewed to the right, where the tail is longer. The centre line at 0.58 is the sample Sharpe ratio. Say we’d like to identify confidence intervals for the following 2 year period, can we use the intervals found above?</p>
+<p>The answer is no, because we can be less sure about a two year horizon than we can about a 13 year horizon, due to smaller sample size. Figure Four shows the same CBB simulation as above but with a sample size of 2 years, rather than 13.</p>
+</div>
+<div id="figure-four---distribution-of-sharpe-ratio-2000-2012-with-two-year-horizon" class="section level4">
+<h4>Figure Four - Distribution of Sharpe Ratio 2000-2012, with Two Year Horizon</h4>
+<p><img src="https://lh3.googleusercontent.com/RFA6a1P6wHwIwuUTTpvUimrGiMxod8w7ElSVE4U5UqmGV3pRQo6GMjU9GRw638pUJJt_vjOVwFDCFg" title="Confidence Estimates for 2 Year Horizon (In-Sample)" width="800" /></p>
+<p>Wow! Glad we didn’t assume a normal distribution. The smaller sample size has expanded the 5% and 95% confidence intervals from [0.14, 1.2] to [-0.26, 2.3].</p>
+<p>The out of sample model performance for the subsequent 2 year period Jan 2013 to Jan 2015 is shown below.</p>
+</div>
+<div id="figure-four---annualized-decile-returns---qvg-model-out-of-sample" class="section level4">
+<h4>Figure Four - Annualized Decile Returns - QVG Model (Out of Sample)</h4>
+<p><img src="https://lh3.googleusercontent.com/pNIXt0u-f-8B6rhQWMckDgp9f-5DFeQB3rxeN75cQC6udRbHwEgYleTtOwOrFrMSURGBLRyDEGsc7g" title="Annualized Decile Returns - QVG Model (Out of Sample)" /></p>
+</div>
+<div id="figure-five---top-decile-cumulative-return-out-of-sample" class="section level4">
+<h4>Figure Five - Top Decile Cumulative Return (Out-of-Sample)</h4>
+<p><img src="https://lh3.googleusercontent.com/bDF7pMllRKKH8oTuFGj--dMYVJ2iwJq-sJV12q0W2EiTcM_LvyPxcmA6yoYTGe3oRfeHw6vd9kzN0Q" title="Top Decile Equity Curve Out-of-Sample" width="800" /></p>
+<p>The realized Sharpe ratio was 2.33. So the bootstrap would suggest the out-of-sample result is unusually good, but to be expected around 5% of the time.</p>
+<p>As discussed earlier, the confidence interval values are only reliable to the extent that the insample period is representative of the out of sample period. In this case the GFC period represents around 12% of insample data, which is probably driving overly pessimistic estimates.</p>
+</div>
+</div>
+<div id="quantifying-uncertainty" class="section level3">
+<h3>Quantifying Uncertainty</h3>
+<p>Uncertainty is sometimes broken down into aletory and epistemic components. Aletory refers to sources of variability that are purely random, whereas epistemic refers to limitations of the model itself to capture the dynamics of the underlying system.</p>
+<p>In the context of the dice example, the aletory uncertainty comes from the multiple facets of the dice. No matter how many times we observe the dice, there is always random variation which we quantify in terms of the probability of each outcome. The epistemic uncertainty is characterized by alternate possible probability distributions.</p>
+<p>Specifically, we used the bootstrap to estimate the epistemic uncertainty of dice probabilities. Because we only had 12 samples the epistemic uncertainty was high. As the dice is rolled more times, our estimate of the aletory variability improves and the epistemic uncertainty decreases towards zero.</p>
+<p>In the dice experiment, epistemic uncertainty was limited to sampling error, but in the real world epistemic uncertainty includes non-stationarity<span class="math inline">\(^4\)</span>. In the context of the financial model sources of non-stationarity might include:</p>
+<ul>
+<li>Changes in the accounting standards upon which the model is based</li>
+<li>Ad hoc crises (eg Global Financial Crisis)</li>
+<li>Increased competition from other investors implementing similar strategies</li>
+</ul>
+<p>Finally we can think of epistemic uncertainty in terms of the great quote by J.M Keynes<span class="math inline">\(^5\)</span></p>
+<blockquote>
+<p>The sense in which I am using the term is that in which the prospect of a European war is uncertain, or the price of copper and the rate of interest twenty years hence, or the obsolescence of a new invention, or the position of private wealth-owners in the social system in 1970. About these matters there is no scientific basis on which to form any calculable probability whatever. We simply do not know.</p>
+</blockquote>
+</div>
+<div id="summary" class="section level3">
+<h3>Summary</h3>
+<p>In this post I’ve endeavoured to provide an introduction to the technique of bootstrapping, as well as convey some of the opportunities and pitfalls of its application to quant finance. If you have any questions or would like to share your experience, please leave a comment below.</p>
+</div>
+<div id="notes" class="section level3">
+<h3>Notes</h3>
+<p><span class="math inline">\(^{1}\)</span> Jeremy Orloff and Jonathan Bloom <a href="https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf">Bootstrap confidence intervals</a> (2014)
+<span class="math inline">\(^{2}\)</span> For simplicity we assume a risk free rate of zero so Sharpe Ratio becomes</p>
+<p><span class="math inline">\(SR = \dfrac{Portfolio \space Return \space p.a.}{Portfolio\space Volatility\space p.a.}\)</span></p>
+<p><span class="math inline">\(^3\)</span> W Härdle, J Horowitz, J Kreiss <a href="https://projecteuclid.org/euclid.isr/1069172307">Bootstrap Methods for Time Series</a> (2003)<br />
+<span class="math inline">\(^4\)</span> An alternative possibility is that the dynamics maybe stationary but over a longer time scale than the available data<br />
+<span class="math inline">\(^5\)</span> John Maynard Keynes, “The General Theory of Employment” (1937)</p>
+</div>
+<div id="further-reading" class="section level3">
+<h3>Further Reading</h3>
+<p>Bradley Efron R.J. Tibshirani <a href="https://www.amazon.com.au/Introduction-Bootstrap-Bradley-Efron/dp/0412042312">An Introduction to the Bootstrap</a> (1994)
+John Rice, <a href="https://www.amazon.com/Mathematical-Statistics-Analysis-Available-Enhanced/dp/0534399428">Mathematical Statistics and Data Analysis</a> Third Edition (2007)</p>
+</div>
+
+				</main>
+				<footer class="footer">
+					
+					
+				</footer>
+			</article>
+			<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+    
+    
+    if (window.location.hostname == "localhost")
+        return;
+
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    var disqus_shortname = 'njisyd';
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</main>
+				<aside class="sidebar">
+			<div class="container sidebar-sticky">
+				<header class="sidebar-about h-card vcard p-author">
+					
+					<a class="u-url u-uid" rel="me" href="../../../../">
+						<img class="u-photo" src="../../../../author.jpg" width=128 height=128 />
+					</a>
+					
+
+					
+					<span class="site-title u-name fn">
+					  <a class="u-url u-uid" rel="me" href="../../../../">The Future Has Arrived</a>
+				  </span>
+					
+
+					<p class="lead p-note">
+						 data science, behavioural finance and the rise of machines 
+					</p>
+
+					<nav>
+						<ul class="sidebar-nav">
+							
+							<li><a href="../../../../post/"> Posts </a></li>
+							
+							<li><a href="../../../../2018/03/26/up-and-running-with-fast-ai-and-docker/"> Up and Running With Fast.ai and Docker </a></li>
+							
+						</ul>
+					</nav>
+
+					
+						<aside class="contact">
+						  
+							  <h3 class="contact-head">Contact Me</h3>
+						  
+							<ul class="contact-list">
+								
+								<li>
+									
+									  
+		  						    <i class='fa fa-github fa-fw'></i>
+		  						  
+		  							<a href="https://github.com/nji-syd" class="u-url url" rel="me">
+		  							  GitHub
+		  							</a>
+								
+								</li>
+								
+								<li>
+									
+									  
+		  						    <i class='fa fa-linkedin fa-fw'></i>
+		  						  
+		  							<a href="https://linkedin.com/in/nickirelandau" class="u-url url" rel="me">
+		  							  LinkedIn
+		  							</a>
+								
+								</li>
+								
+							</ul>
+						</aside>
+					
+				</header>
+
+				<footer>&copy; 2018. All rights reserved. </footer>
+			</div>
+		</aside>
+
+		  <footer>
+  
+  
+ 
+  
+<script src="../../../../js/math-code.js"></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    processEscapes: true
+  }
+});
+</script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+  
+  </footer>
+  </body>
+</html>
+
+	</body>
+</html>

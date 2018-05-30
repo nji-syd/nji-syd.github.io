@@ -6,10 +6,19 @@
     <description>Recent content in Posts on The Future Has Arrived</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 26 Mar 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 30 May 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>An Introduction To The Boostrap For Quantitative Stock Selection</title>
+      <link>/2018/05/30/an-introduction-to-the-boostrap-for-quantitative-stock-selection/</link>
+      <pubDate>Wed, 30 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/05/30/an-introduction-to-the-boostrap-for-quantitative-stock-selection/</guid>
+      <description>Quantifying uncertainty is a fundamental and challenging task in financial modelling. In this post we’ll look at the bootstrap technique and how it can be applied to quantitative models. More generally, the bootstrap lies at the heart of a statistical technique know as Bootstap Aggregation (also known as bagging), which is the basis for machine learning algorithms such as random forest. We’ll look at Bagging in greater detail in the next post.</description>
+    </item>
     
     <item>
       <title>Up and Running With Fast.ai and Docker</title>
