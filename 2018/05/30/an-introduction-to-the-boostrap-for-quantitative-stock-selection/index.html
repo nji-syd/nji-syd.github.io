@@ -240,10 +240,10 @@ Figure One shows the annualized return for each of the ten portfolios over the i
 </div>
 <div id="quantifying-uncertainty" class="section level3">
 <h3>Quantifying Uncertainty</h3>
-<p>Uncertainty is sometimes broken down into aletory and epistemic components. Aletory refers to sources of variability that are purely random, whereas epistemic refers to limitations of the model itself to capture the dynamics of the underlying system.</p>
-<p>In the context of the dice example, the aletory uncertainty comes from the multiple facets of the dice. No matter how many times we observe the dice, there is always random variation which we quantify in terms of the probability of each outcome. The epistemic uncertainty is characterized by alternate possible probability distributions.</p>
+<p>Uncertainty is sometimes broken down into aleatory and epistemic components. Aleatory refers to sources of variability that are purely random, whereas epistemic refers to limitations of the model and available data to capture the dynamics of the underlying system.</p>
+<p>In the context of the dice example, the aletory uncertainty comes from the multiple facets of the dice. No matter how many times we observe the dice, there is always random variation which we quantify in terms of the probability of each outcome. The epistemic uncertainty is characterized by alternate possible probability distributions<span class="math inline">\(^4\)</span>.</p>
 <p>Specifically, we used the bootstrap to estimate the epistemic uncertainty of dice probabilities. Because we only had 12 samples the epistemic uncertainty was high. As the dice is rolled more times, our estimate of the aletory variability improves and the epistemic uncertainty decreases towards zero.</p>
-<p>In the dice experiment, epistemic uncertainty was limited to sampling error, but in the real world epistemic uncertainty includes non-stationarity<span class="math inline">\(^4\)</span>. In the context of the financial model sources of non-stationarity might include:</p>
+<p>In the dice experiment, epistemic uncertainty was limited to sampling error, but in the world of quantitative finance epistemic uncertainty includes limitations of the model itself and non-stationarity. We’ve seen that the bootstrap can estimate some classes of epistemic uncertainty such as sampling error, but other sources are out of reach. In the context of the financial model sources of non-stationarity might include:</p>
 <ul>
 <li>Changes in the accounting standards upon which the model is based</li>
 <li>Ad hoc crises (eg Global Financial Crisis)</li>
@@ -251,7 +251,7 @@ Figure One shows the annualized return for each of the ten portfolios over the i
 </ul>
 <p>Finally we can think of epistemic uncertainty in terms of the great quote by J.M Keynes<span class="math inline">\(^5\)</span></p>
 <blockquote>
-<p>The sense in which I am using the term is that in which the prospect of a European war is uncertain, or the price of copper and the rate of interest twenty years hence, or the obsolescence of a new invention, or the position of private wealth-owners in the social system in 1970. About these matters there is no scientific basis on which to form any calculable probability whatever. We simply do not know.</p>
+<p>The sense in which I am using the term [uncertainty] is that in which the prospect of a European war is uncertain, or the price of copper and the rate of interest twenty years hence, or the obsolescence of a new invention, or the position of private wealth-owners in the social system in 1970. About these matters there is no scientific basis on which to form any calculable probability whatever. We simply do not know.</p>
 </blockquote>
 </div>
 <div id="summary" class="section level3">
@@ -263,9 +263,9 @@ Figure One shows the annualized return for each of the ten portfolios over the i
 <p><span class="math inline">\(^{1}\)</span> Jeremy Orloff and Jonathan Bloom <a href="https://ocw.mit.edu/courses/mathematics/18-05-introduction-to-probability-and-statistics-spring-2014/readings/MIT18_05S14_Reading24.pdf">Bootstrap confidence intervals</a> (2014)<br />
 <span class="math inline">\(^{2}\)</span> For simplicity we assume a risk free rate of zero so Sharpe Ratio becomes</p>
 <p><span class="math inline">\(SR = \dfrac{Portfolio \space Return \space p.a.}{Portfolio\space Volatility\space p.a.}\)</span></p>
-<p><span class="math inline">\(^3\)</span> W Härdle, J Horowitz, J Kreiss <a href="https://projecteuclid.org/euclid.isr/1069172307">Bootstrap Methods for Time Series</a> (2003)<br />
-<span class="math inline">\(^4\)</span> An alternative possibility is that the dynamics maybe stationary but over a longer time scale than the available data<br />
-<span class="math inline">\(^5\)</span> John Maynard Keynes, “The General Theory of Employment” (1937)</p>
+<p><span class="math inline">\(^3\)</span> W Härdle, J Horowitz, J Kreiss <a href="https://projecteuclid.org/euclid.isr/1069172307">Bootstrap Methods for Time Series</a> (2003)</p>
+<p><span class="math inline">\(^4\)</span> Norman Abrahamson <a href="http://www.ce.memphis.edu/7137/PDFs/Abrahamson/C05.pdf">Aleatory Variability and Epistemic Uncertainty</a></p>
+<p><span class="math inline">\(^5\)</span> John Maynard Keynes, “The General Theory of Employment” (1937)</p>
 </div>
 <div id="further-reading" class="section level3">
 <h3>Further Reading</h3>
