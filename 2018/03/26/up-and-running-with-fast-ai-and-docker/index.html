@@ -62,7 +62,9 @@
 
 <h3 id="caveats">Caveats</h3>
 
-<p>Docker doesn&rsquo;t run natively on Windows or OSX. To use docker with these platforms you need to introduce an additional layer of virtualization, such as <a href="https://docs.docker.com/docker-for-windows/">Docker For Windows</a> or <a href="https://docs.docker.com/docker-for-mac/install/">Docker for Mac</a>. According to this <a href="https://www.phoronix.com/scan.php?page=article&amp;item=windows10-wsl-docker&amp;num=1">article</a> performance is improving, but still lags bare metal Linux installations. However nvidia-docker is still not supported on Windows and Mac. Docker containers need root privileges to run, which may pose security issues in some corporate settings.</p>
+<p>Firstly, Docker containers need root privileges to run, which may pose security issues in some corporate settings.</p>
+
+<p>Secondly, Docker doesn&rsquo;t run natively on Windows or OSX. To use docker with these platforms you need to introduce an additional layer of virtualization, such as <a href="https://docs.docker.com/docker-for-windows/">Docker For Windows</a> or <a href="https://docs.docker.com/docker-for-mac/install/">Docker for Mac</a>. According to this <a href="https://www.phoronix.com/scan.php?page=article&amp;item=windows10-wsl-docker&amp;num=1">article</a> performance is improving, but still lags bare metal Linux installations. However nvidia-docker is still not supported on Windows and Mac. Given the importance of a GPU for deep learning, Docker probably doesn&rsquo;t make sense if you want to use Windows or Mac.</p>
 
 <h3 id="installation-on-host">Installation on Host</h3>
 
