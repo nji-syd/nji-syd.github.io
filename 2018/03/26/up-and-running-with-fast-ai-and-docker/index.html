@@ -77,10 +77,10 @@
 <li>fastai.latest.cuda9</li>
 </ol>
 
-<p>You can access the docker files <a href="https://github.com/nji-syd/fastai-docker">here</a>. The docker files support nvidia-docker for versions 8 and 9 of cuda respectively. There are two differences between the files:</p>
+<p>You can access the docker files <a href="https://github.com/nji-syd/fastai-docker">here</a>. The docker files support nvidia-docker for versions 8 and 9 of cuda respectively. Both images inherit from an ubuntu16.04 image with CUDA. The differences between the two files are:</p>
 
 <ol>
-<li><p>The cuda 8 version inherits from an ubuntu16.04 image with CUDA 8 installed whereas the cuda 9 version has cuda 9 installed. Both images are sourced from NVIDIA.</p>
+<li><p>The cuda version installed on the OS, being 8 and 9 respectively.</p>
 
 <pre><code>FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04
 </code></pre>
@@ -88,7 +88,7 @@
 <pre><code>FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 </code></pre></li>
 
-<li><p>The cuda 8 version installs the cuda80 python package rather than the cuda90 package for version 9. The Fastai python environment is created from the environment.yml file included in the Fastai github repository. To support cuda 8, we replace the cuda90 python package provided in environment.yml with the cuda80 package:</p></li>
+<li><p>The python package to interface with CUDA being cuda80 and cuda90 respectively. The Fastai python environment is created from the environment.yml file included in the Fastai github repository. To support cuda 8, we replace the cuda90 python package provided in environment.yml with the cuda80 package:</p></li>
 </ol>
 
 <pre><code>#           FASTAI
