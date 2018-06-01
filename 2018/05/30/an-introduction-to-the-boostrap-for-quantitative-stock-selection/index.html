@@ -39,7 +39,7 @@
 					<time class="post-date dt-published" datetime="2018-05-30T00:00:00Z">Wednesday, 30 May 2018</time>
 				</header>
 				<main class="post-content e-content">
-					<p>Quantifying uncertainty is a fundamental and challenging task in financial modelling. In this post we’ll look at the bootstrap technique and how it can be applied to quantitative models. More generally, the bootstrap lies at the heart of a statistical technique called Bootstap Aggregation (bagging for short), which is the basis for machine learning algorithms such as random forest. We’ll look at Bagging in greater detail in the next post.</p>
+					<p>Quantifying uncertainty is a fundamental and challenging task in financial modelling. In this post we’ll look at the bootstrap technique and how it can be applied to quantitative models. More generally, the bootstrap lies at the heart of a statistical technique called Bootstap Aggregation (bagging for short), which is the basis for machine learning algorithms such as random forest.</p>
 <p><img src="https://lh3.googleusercontent.com/BkRlGAPrNJsVXBBFAkgYmOMgA0Icm3eOMgl_VOh8xvnMunkuv4zzxblOlt2UECAJ4GueU_HQONbStw" width="650" /></p>
 <div id="the-bootstrap" class="section level3">
 <h3>The Bootstrap</h3>
@@ -62,7 +62,7 @@ but their implementation has. The modern computer lets us apply these
 ideas flexibly, quickly, easily and with a minimum of mathematical
 assumptions.</p>
 </blockquote>
-<p>The bootstrap is a useful tool for uncertainty estimation. We might want to explore the uncertainty around a specific model, or compare the relative uncertainty of two or more models. As with any kind of financial risk analysis, the results are only as good as the assumptions on which they are based. If the data generating process is non-stationary, the results will be unreliable.</p>
+<p>We can use the bootstrap to explore the uncertainty around a specific model, or compare the relative uncertainty of two or more models. As with any kind of financial risk analysis, the results are only as good as the assumptions on which they are based. If the data generating process is non-stationary, the results will be unreliable.</p>
 <p>If we think about the historical performance of a stock portfolio, we have a empirical distribution of returns. We might want to infer metrics from the data, perhaps the annualized return, Sharpe ratio, or maximum drawdown of the portfolio. Statistically speaking, the true value of these quantities are unknown. If that sounds a little abstract, the example below will hopefully make things clearer. Then we will look to how the bootstrap allows for the estimation of confidence levels in the observations we have.</p>
 </div>
 <div id="dice-example" class="section level3">
@@ -256,7 +256,7 @@ Figure One shows the annualized return for each of the ten portfolios over the i
 </div>
 <div id="summary" class="section level3">
 <h3>Summary</h3>
-<p>In this post I’ve endeavoured to provide an introduction to the technique of bootstrapping, as well as convey some of the opportunities and pitfalls of its application to quant finance. If you have any questions or would like to share your experience, please leave a comment below.</p>
+<p>In this post I’ve endeavoured to provide an introduction to the technique of bootstrapping, as well as convey some of the opportunities and pitfalls of its application to quant finance.</p>
 </div>
 <div id="notes" class="section level3">
 <h3>Notes</h3>
@@ -320,8 +320,6 @@ John Rice, <a href="https://www.amazon.com/Mathematical-Statistics-Analysis-Avai
 						<ul class="sidebar-nav">
 							
 							<li><a href="../../../../post/"> Posts </a></li>
-							
-							<li><a href="../../../../2018/03/26/up-and-running-with-fast-ai-and-docker/"> Up and Running With Fast.ai and Docker </a></li>
 							
 						</ul>
 					</nav>
