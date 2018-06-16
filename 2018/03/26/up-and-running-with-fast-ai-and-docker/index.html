@@ -46,7 +46,7 @@
 				<main class="post-content e-content">
 					
 
-<p>Last Monday marked the start of the latest series of Fast.ai courses: <em>Cutting Edge Deep Learning For Coders</em>. If you have an interest in data science and haven’t heard of Fast.ai, you should check them out. Fast.ai is a community started by Jeremy Howard and Rachael Thomas in 2016. It now includes an impressive set of courses and a machine learning library by the same name. What sets them apart is their practical no nonsense approach to solving data science problems by example. In this post, I’m sharing two docker files which provide a data science environment based on the Fast.ai library, as well some tips for getting up and running with docker quickly.</p>
+<p>Last Monday marked the start of the latest series of Fast.ai courses: <em>Cutting Edge Deep Learning For Coders</em>. If you have an interest in data science and haven’t heard of Fast.ai, you should check them out. Fast.ai is a community started by Jeremy Howard and Rachael Thomas in 2016. It now includes an impressive set of courses and a machine learning library by the same name. What sets them apart is their practical no nonsense approach to solving data science problems by example. In this post, I’m sharing two <a href="https://github.com/nji-syd/fastai-docker">Fast.ai docker files</a> which provide a data science environment based on the Fast.ai library, as well some tips for getting up and running with docker quickly.</p>
 
 <p><img src = "https://lh3.googleusercontent.com/uBEkyR6SqA7bh-iyJy4LnMV-eF0C2GzHXQshRFZCIh_6MqmaMab1JaZcwZbEX69hpRJAso3AMYMSMg", width = "650"></p>
 
@@ -66,7 +66,7 @@
 
 <p>Firstly, Docker containers need root privileges to run, which may pose security issues in some corporate settings.</p>
 
-<p>Secondly, Docker doesn&rsquo;t run natively on Windows or OSX. To use docker with these platforms you need to introduce an additional layer of virtualization, such as <a href="https://docs.docker.com/docker-for-windows/">Docker For Windows</a> or <a href="https://docs.docker.com/docker-for-mac/install/">Docker for Mac</a>. According to this <a href="https://www.phoronix.com/scan.php?page=article&amp;item=windows10-wsl-docker&amp;num=1">article</a> performance is improving, but still lags bare metal Linux installations. However nvidia-docker is still not supported on Windows and Mac. Given the importance of a GPU for deep learning, Docker probably doesn&rsquo;t make sense if you want to use Windows or Mac.</p>
+<p>Secondly, Docker doesn&rsquo;t run natively on Windows or OSX. To use docker with these platforms you need to introduce an additional layer of virtualization, such as <a href="https://docs.docker.com/docker-for-windows/">Docker For Windows</a> or <a href="https://docs.docker.com/docker-for-mac/install/">Docker for Mac</a>. According to this <a href="https://www.phoronix.com/scan.php?page=article&amp;item=windows10-wsl-docker&amp;num=1">article</a> performance is improving, but still lags bare metal Linux installations. However nvidia-docker is still not supported on Windows and Mac. Given the importance of a GPU for deep learning, Docker probably doesn&rsquo;t make sense if you want to use Windows or Mac. The docker files have been developed for systems with a GPU supported by nvidia-docker.</p>
 
 <h3 id="installation-on-host">Installation on Host</h3>
 
@@ -81,7 +81,7 @@
 <li>fastai.latest.cuda9</li>
 </ol>
 
-<p>You can access the docker files <a href="https://github.com/nji-syd/fastai-docker">here</a>. The docker files support nvidia-docker for versions 8 and 9 of cuda respectively. Both images inherit from an ubuntu16.04 image with CUDA. The differences between the two files are:</p>
+<p>You can access the repo <a href="https://github.com/nji-syd/fastai-docker">here</a>. The docker files support nvidia-docker for versions 8 and 9 of cuda respectively. Both images inherit from an ubuntu16.04 image with CUDA. The differences between the two files are:</p>
 
 <ol>
 <li><p>The cuda version installed on the OS, being 8 and 9 respectively.</p>
