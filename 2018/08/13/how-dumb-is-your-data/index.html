@@ -56,9 +56,9 @@
 <ul>
 <li>Human driven problem solving is becoming less important.</li>
 <li>Machine learning tools can automatically make sense of the data.</li>
-<li>That somehow we already have achieved strong AI</li>
+<li>That strong AI is on the door step.</li>
 </ul>
-<p>In <a href="../../../../2018/08/10/human-like-abilities-in-30-lines-of-code/">Part One</a> of this series we saw how a deep learning neural network can take large quantities of unstructured data with little human help and answer useful queries such as <em>which breed of dog is this?</em>. And in these contexts, the answers are often better than human level performance. As significant as these breakthroughs are, these problems are typically about correlating unstructured inputs (pixels, text, audio) with associated outputs. There is no reasoning about the world, or making sense of structured data - a task which ultimately falls to us as humans.</p>
+<p>In <a href="../../../../2018/08/10/human-like-abilities-in-30-lines-of-code/">Part One</a> of this series we saw how a deep learning neural network can take large quantities of unstructured data with little human help and answer useful queries such as <em>which breed of dog is this?</em> And in these contexts, the answers are often better than human level performance. As significant as these breakthroughs are, these problems are typically about correlating unstructured inputs (pixels, text, audio) with associated outputs. There is no reasoning about the world, or making sense of structured data - a task which ultimately falls to us as humans.</p>
 <p>The limitations of the data centric approach are discussed by <a href="https://en.wikipedia.org/wiki/Judea_Pearl">Judea Pearl</a> in his latest book <a href="https://www.amazon.com/Book-Why-Science-Cause-Effect/dp/046509760X/">The Book of Why</a>. Pearl, one of the pioneers of Bayesian Networks, points out that much of our knowledge as humans is based on causal understanding rather than mere data or facts. He identifies three levels of causal sophistication, placing modern techniques such as deep learning on the lowest rung (association):</p>
 <ol style="list-style-type: decimal">
 <li><strong>Association</strong>: The level of seeing and observing. How would seeing X change my belief in Y?</li>
@@ -317,7 +317,7 @@ Total
 </table>
 <p>Adjusting for gender the treatment effect is 23.8% (19/80) vs control of 17.5% (14/80), as compared with unadjusted rates of 18.3% and 21.7% respectively. More significantly our conclusion that the drug is good for heart attacks has reversed to the drug being bad for heart attacks.</p>
 <p>In <a href="../../../../2018/08/10/human-like-abilities-in-30-lines-of-code/">Part One</a> of this series we saw the magic of deep learning in action. In just 30 lines of code we shoveled in the data and the neural network figured out all the answers, better than most humans could. But operating on the level of association, here the deep neural network can’t help. If we feed it the wrong associations the conclusions will also be wrong.</p>
-<p>OK. But what if we just stratify the data before doing machine learning? Let’s consider one final example. The data in table 4 is exactly the same as the previous experiment, except this time the scenario is different. The drug in question lowers blood pressure. The sub groups are now blood pressure, rather than gender.</p>
+<p>OK. But what if we just stratify the data before doing machine learning? Let’s consider one final example. The data in table 4 is exactly the same as the previous study, except this time the scenario is different. The drug in question lowers blood pressure. The sub groups are now blood pressure, rather than gender.</p>
 </div>
 <div id="table-four-observational-study-two" class="section level4">
 <h4>Table Four: Observational Study Two</h4>
@@ -410,7 +410,7 @@ Total
 </table>
 <p>In the previous experiment, gender was a confounding variable, but what about blood pressure? Looking at the data in table four, it’s clear that the drug appears to be lowering blood pressure. Two thirds of participants in the treatment group have low blood pressure as compared with 1/3 in the control group. Additionally the rate of heart attack in the low blood pressure group is significantly lower. This appears consistent with an effective drug.</p>
 <p>Does it make sense to adjust the data as we did above, and conclude that the drug is bad?</p>
-<p>Clearly not. In this case there is no confounding and it doesn’t make sense to adjust for blood pressure. This is the second part of Simpson’s paradox. Same data, different conclusion. The differences between the two experiments are indicated by causal diagrams shown in figures one and two.</p>
+<p>Clearly not. In this case there is no confounding and it doesn’t make sense to adjust for blood pressure. This is the second part of Simpson’s paradox. Same data, different conclusion. The differences between the two scenarios are indicated by causal diagrams shown in figures one and two.</p>
 </div>
 <div id="figure-one-causal-diagram---observational-study-one" class="section level4">
 <h4>Figure One: Causal Diagram - Observational Study One</h4>
