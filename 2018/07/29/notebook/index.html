@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="en-US">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+
+		
+		<title>Notebook &middot; The Future Has Arrived</title>
+		
+
+		
+			
+		
+
+		
+
+		
+		
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+		
+
+		<link rel="stylesheet" href="../../../../font-awesome/css/font-awesome.min.css" type="text/css">
+		<link rel="stylesheet" href="../../../../css/poole.css">
+		<link rel="stylesheet" href="../../../../css/syntax.css">
+		<link rel="stylesheet" href="../../../../css/hyde.css">
+		
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="The Future Has Arrived">
+		<link href="../../../../2018/07/29/notebook" rel="canonical">
+	</head>
+
+	<body class="  h-entry">
+		<main class="content container" role="main">
+			<article class="post">
+				<header>
+					<a class="u-url" href="../../../../2018/07/29/notebook">
+						<h1 class="post-title p-name">Notebook</h1>
+					</a>
+					<time class="post-date dt-published" datetime="2018-07-29T00:00:00Z">Sunday, 29 July 2018</time>
+				</header>
+				<main class="post-content e-content">
+					<div id="TOC">
+true
+</div>
+
+<div id="dogs-breeds" class="section level1">
+<h1>Dogs breeds</h1>
+<p><a href="https://youtu.be/JNxcznsrRb8?t=1h31m8s" class="uri">https://youtu.be/JNxcznsrRb8?t=1h31m8s</a></p>
+<pre class="python"><code>&gt;&gt;&gt; %reload_ext autoreload
+&gt;&gt;&gt; %autoreload 2
+&gt;&gt;&gt; %matplotlib inline</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; from fastai.imports import *
+&gt;&gt;&gt; from fastai.torch_imports import *
+&gt;&gt;&gt; from fastai.transforms import *
+&gt;&gt;&gt; from fastai.conv_learner import *
+&gt;&gt;&gt; from fastai.model import *
+&gt;&gt;&gt; from fastai.dataset import *
+&gt;&gt;&gt; from fastai.sgdr import *
+&gt;&gt;&gt; from fastai.plots import *</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; torch.cuda.set_device(0)</code></pre>
+<p>Kaggle Dog Breed Identification. Get data from <a href="https://www.kaggle.com/c/dog-breed-identification" class="uri">https://www.kaggle.com/c/dog-breed-identification</a></p>
+<pre class="python"><code>&gt;&gt;&gt; PATH = &quot;/data/fastai/dogbreeds/&quot;
+&gt;&gt;&gt; sz = 224
+&gt;&gt;&gt; arch = resnext101_64
+&gt;&gt;&gt; bs = 58</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; label_csv = f&#39;{PATH}labels.csv&#39;
+&gt;&gt;&gt; n = len(list(open(label_csv))) - 1 # header is not counted (-1)
+&gt;&gt;&gt; val_idxs = get_cv_idxs(n) # random 20% data for validation set</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; n
+10222</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; len(val_idxs)
+2044</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; # If you haven&#39;t downloaded weights.tgz yet, download the file.
+... #     http://forums.fast.ai/t/error-when-trying-to-use-resnext50/7555
+... #     http://forums.fast.ai/t/lesson-2-in-class-discussion/7452/222
+... #!wget -O fastai/weights.tgz http://files.fast.ai/models/weights.tgz
+...
+... #!tar xvfz fastai/weights.tgz -C fastai</code></pre>
+<div id="initial-exploration" class="section level2">
+<h2>Initial exploration</h2>
+<pre class="python"><code>&gt;&gt;&gt; !ls {PATH}
+labels.csv  sample_submission.csv  test  tmp  train</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; label_df = pd.read_csv(label_csv)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; display(label_df.head(),len(label_df))
+                                 id             breed
+0  000bec180eb18c7604dcecc8fe0dba07       boston_bull
+1  001513dfcb2ffafc82cccf4d8bbaba97             dingo
+2  001cdf01b096e06d78e9e5112d419397          pekinese
+3  00214f311d5d2247d5dfe4fe24b2303d          bluetick
+4  0021f9ceb3235effd7fcde7f7538ed62  golden_retriever
+10222</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; label_df.pivot_table(index=&quot;breed&quot;, aggfunc=len).sort_values(&#39;id&#39;, ascending=False)
+                                 id
+breed
+scottish_deerhound              126
+maltese_dog                     117
+afghan_hound                    116
+entlebucher                     115
+bernese_mountain_dog            114
+shih-tzu                        112
+great_pyrenees                  111
+pomeranian                      111
+basenji                         110
+samoyed                         109
+airedale                        107
+tibetan_terrier                 107
+leonberg                        106
+cairn                           106
+beagle                          105
+japanese_spaniel                105
+australian_terrier              102
+blenheim_spaniel                102
+miniature_pinscher              102
+irish_wolfhound                 101
+lakeland_terrier                 99
+saluki                           99
+papillon                         96
+whippet                          95
+siberian_husky                   95
+norwegian_elkhound               95
+pug                              94
+chow                             93
+italian_greyhound                92
+pembroke                         92
+...                             ...
+german_short-haired_pointer      75
+boxer                            75
+bull_mastiff                     75
+borzoi                           75
+pekinese                         75
+cocker_spaniel                   74
+american_staffordshire_terrier   74
+doberman                         74
+brittany_spaniel                 73
+malinois                         73
+standard_schnauzer               72
+flat-coated_retriever            72
+redbone                          72
+border_collie                    72
+curly-coated_retriever           72
+kuvasz                           71
+chihuahua                        71
+soft-coated_wheaten_terrier      71
+french_bulldog                   70
+vizsla                           70
+tibetan_mastiff                  69
+german_shepherd                  69
+giant_schnauzer                  69
+walker_hound                     69
+otterhound                       69
+golden_retriever                 67
+brabancon_griffon                67
+komondor                         67
+briard                           66
+eskimo_dog                       66
+
+[120 rows x 1 columns]</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; tfms = tfms_from_model(arch, sz, aug_tfms=transforms_side_on, max_zoom=1.1)
+&gt;&gt;&gt; # class labels identified in labels.csv
+... data = ImageClassifierData.from_csv(PATH, &#39;train&#39;, f&#39;{PATH}labels.csv&#39;, test_name=&#39;test&#39;, # we need to specify where the test set is if you want to submit to Kaggle competitions
+...                                    val_idxs=val_idxs, suffix=&#39;.jpg&#39;, tfms=tfms, bs=bs)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; fn = PATH + data.trn_ds.fnames[0]; fn
+&#39;/data/fastai/dogbreeds/train/001513dfcb2ffafc82cccf4d8bbaba97.jpg&#39;</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; img = PIL.Image.open(fn); img
+&lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=500x375 at 0x7F0D7881BA90&gt;</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; img.size
+(500, 375)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; size_d = {k: PIL.Image.open(PATH + k).size for k in data.trn_ds.fnames}</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; row_sz, col_sz = list(zip(*size_d.values()))</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; row_sz = np.array(row_sz); col_sz = np.array(col_sz)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; row_sz[:5]
+array([500, 500, 500, 500, 500])</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; plt.hist(row_sz);
+&lt;Figure size 432x288 with 1 Axes&gt;</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; plt.hist(row_sz[row_sz &lt; 1000])
+(array([ 135.,  592., 1347., 1164., 4599.,  128.,   76.,   62.,   14.,   11.]),
+ array([ 97. , 185.5, 274. , 362.5, 451. , 539.5, 628. , 716.5, 805. , 893.5, 982. ]),
+ &lt;a list of 10 Patch objects&gt;)
+&lt;Figure size 432x288 with 1 Axes&gt;</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; plt.hist(col_sz);
+&lt;Figure size 432x288 with 1 Axes&gt;</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; plt.hist(col_sz[col_sz &lt; 1000])
+(array([ 235.,  733., 2205., 2979., 1807.,   98.,   27.,   33.,    7.,   10.]),
+ array([102., 190., 278., 366., 454., 542., 630., 718., 806., 894., 982.]),
+ &lt;a list of 10 Patch objects&gt;)
+&lt;Figure size 432x288 with 1 Axes&gt;</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; len(data.trn_ds), len(data.test_ds)
+(8178, 10357)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; len(data.classes), data.classes[:5]
+(120,
+ [&#39;affenpinscher&#39;,
+  &#39;afghan_hound&#39;,
+  &#39;african_hunting_dog&#39;,
+  &#39;airedale&#39;,
+  &#39;american_staffordshire_terrier&#39;])</code></pre>
+</div>
+<div id="initial-model" class="section level2">
+<h2>Initial model</h2>
+<pre class="python"><code>&gt;&gt;&gt; def get_data(sz, bs): # sz: image size, bs: batch size
+...     tmfs = tfms_from_model(arch, sz, aug_tfms=transforms_side_on, max_zoom=1.1)
+...     data = ImageClassifierData.from_csv(PATH, &#39;train&#39;, f&#39;{PATH}labels.csv&#39;, test_name=&#39;test&#39;,
+...                                        val_idxs=val_idxs, suffix=&#39;.jpg&#39;, tfms=tfms, bs=bs)
+...
+...     # http://forums.fast.ai/t/how-to-train-on-the-full-dataset-using-imageclassifierdata-from-csv/7761/13
+...     # http://forums.fast.ai/t/how-to-train-on-the-full-dataset-using-imageclassifierdata-from-csv/7761/37
+...     return data if sz &gt; 300 else data.resize(340, &#39;tmp&#39;) # Reading the jpgs and resizing is slow for big images, so resizing them all to 340 first saves time
+...
+&gt;&gt;&gt; #Source:
+... #    def resize(self, targ, new_path):
+... #        new_ds = []
+... #        dls = [self.trn_dl,self.val_dl,self.fix_dl,self.aug_dl]
+... #        if self.test_dl: dls += [self.test_dl, self.test_aug_dl]
+... #        else: dls += [None,None]
+... #        t = tqdm_notebook(dls)
+... #        for dl in t: new_ds.append(self.resized(dl, targ, new_path))
+... #        t.close()
+... #        return self.__class__(new_ds[0].path, new_ds, self.bs, self.num_workers, self.classes)
+... #File:      ~/fastai/courses/dl1/fastai/dataset.py</code></pre>
+<div id="precompute" class="section level3">
+<h3>Precompute</h3>
+<pre class="python"><code>&gt;&gt;&gt; data = get_data(sz, bs)
+HBox(children=(IntProgress(value=0, max=6), HTML(value=&#39;&#39;)))</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; data.is_multi
+False</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn = ConvLearner.pretrained(arch, data, precompute=True)
+/opt/conda/envs/fastai/lib/python3.6/site-packages/torch/cuda/__init__.py:97: UserWarning:
+    Found GPU0 GeForce GTX 870M which is of cuda capability 3.0.
+    PyTorch no longer supports this GPU because it is too old.
+
+  warnings.warn(old_gpu_warn % (d, name, major, capability[1]))</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.fit(1e-2, 5)
+
+epoch      trn_loss   val_loss   accuracy
+    0      0.961046   0.404041   0.90411
+    1      0.434975   0.300661   0.915851
+    2      0.30888    0.268395   0.921233
+    3      0.227394   0.254175   0.925147
+    4      0.19486    0.248396   0.918787HBox(children=(IntProgress(value=0, description=&#39;Epoch&#39;, max=5), HTML(value=&#39;&#39;)))
+
+[array([0.2484]), 0.9187866999328487]</code></pre>
+</div>
+<div id="augment" class="section level3">
+<h3>Augment</h3>
+<pre class="python"><code>&gt;&gt;&gt; from sklearn import metrics</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; data = get_data(sz, bs)
+HBox(children=(IntProgress(value=0, max=6), HTML(value=&#39;&#39;)))</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn = ConvLearner.pretrained(arch, data, precompute=True, ps=0.5)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.fit(1e-2, 2)
+
+epoch      trn_loss   val_loss   accuracy
+    0      1.143174   0.437679   0.901663
+    1      0.53731    0.31813    0.90998HBox(children=(IntProgress(value=0, description=&#39;Epoch&#39;, max=2), HTML(value=&#39;&#39;)))
+
+[array([0.31813]), 0.9099804363605327]</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.precompute = False</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.fit(1e-2, 5, cycle_len=1)
+
+epoch      trn_loss   val_loss   accuracy
+    0      0.436055   0.279566   0.925147
+    1      0.418468   0.26551    0.925636
+    2      0.376452   0.256271   0.920744
+    3      0.336009   0.244518   0.920254
+    4      0.331899   0.238585   0.924658HBox(children=(IntProgress(value=0, description=&#39;Epoch&#39;, max=5), HTML(value=&#39;&#39;)))
+
+[array([0.23859]), 0.9246575378041911]</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.save(&#39;224_pre&#39;)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.load(&#39;224_pre&#39;)</code></pre>
+</div>
+</div>
+<div id="increase-size" class="section level2">
+<h2>Increase size</h2>
+<pre class="python"><code>&gt;&gt;&gt; # Starting training on small images for a few epochs, then switching to bigger images, and continuing training is an amazingly effective way to avoid overfitting.
+...
+... # http://forums.fast.ai/t/planet-classification-challenge/7824/96
+... # set_data doesn’t change the model at all. It just gives it new data to train with.
+... learn.set_data(get_data(299, bs))
+&gt;&gt;&gt; learn.freeze()
+...
+&gt;&gt;&gt; #Source:
+... #    def set_data(self, data, precompute=False):
+... #        super().set_data(data)
+... #        if precompute:
+... #            self.unfreeze()
+... #            self.save_fc1()
+... #            self.freeze()
+... #            self.precompute = True
+... #        else:
+... #            self.freeze()
+... #File:      ~/fastai/courses/dl1/fastai/conv_learner.py
+HBox(children=(IntProgress(value=0, max=6), HTML(value=&#39;&#39;)))</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.summary()
+OrderedDict([(&#39;Conv2d-1&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 3, 224, 224]),
+                           (&#39;output_shape&#39;, [-1, 64, 112, 112]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 9408)])),
+             (&#39;BatchNorm2d-2&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 64, 112, 112]),
+                           (&#39;output_shape&#39;, [-1, 64, 112, 112]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 128)])),
+             (&#39;ReLU-3&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 64, 112, 112]),
+                           (&#39;output_shape&#39;, [-1, 64, 112, 112]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;MaxPool2d-4&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 64, 112, 112]),
+                           (&#39;output_shape&#39;, [-1, 64, 56, 56]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-5&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 64, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 16384)])),
+             (&#39;BatchNorm2d-6&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 512)])),
+             (&#39;ReLU-7&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-8&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 9216)])),
+             (&#39;BatchNorm2d-9&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 512)])),
+             (&#39;ReLU-10&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-11&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 65536)])),
+             (&#39;BatchNorm2d-12&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 512)])),
+             (&#39;Conv2d-13&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 64, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 16384)])),
+             (&#39;BatchNorm2d-14&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 512)])),
+             (&#39;ReLU-15&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-16&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 65536)])),
+             (&#39;BatchNorm2d-17&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 512)])),
+             (&#39;ReLU-18&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-19&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 9216)])),
+             (&#39;BatchNorm2d-20&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 512)])),
+             (&#39;ReLU-21&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-22&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 65536)])),
+             (&#39;BatchNorm2d-23&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 512)])),
+             (&#39;ReLU-24&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-25&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 65536)])),
+             (&#39;BatchNorm2d-26&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 512)])),
+             (&#39;ReLU-27&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-28&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 9216)])),
+             (&#39;BatchNorm2d-29&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 512)])),
+             (&#39;ReLU-30&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-31&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 65536)])),
+             (&#39;BatchNorm2d-32&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 512)])),
+             (&#39;ReLU-33&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-34&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 512, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 131072)])),
+             (&#39;BatchNorm2d-35&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 512, 56, 56]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-36&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 512, 56, 56]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-37&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 36864)])),
+             (&#39;BatchNorm2d-38&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-39&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-40&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 262144)])),
+             (&#39;BatchNorm2d-41&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;Conv2d-42&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 256, 56, 56]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 131072)])),
+             (&#39;BatchNorm2d-43&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-44&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-45&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 262144)])),
+             (&#39;BatchNorm2d-46&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-47&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-48&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 36864)])),
+             (&#39;BatchNorm2d-49&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-50&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-51&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 262144)])),
+             (&#39;BatchNorm2d-52&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-53&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-54&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 262144)])),
+             (&#39;BatchNorm2d-55&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-56&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-57&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 36864)])),
+             (&#39;BatchNorm2d-58&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-59&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-60&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 262144)])),
+             (&#39;BatchNorm2d-61&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-62&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-63&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 262144)])),
+             (&#39;BatchNorm2d-64&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-65&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-66&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 36864)])),
+             (&#39;BatchNorm2d-67&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-68&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-69&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 262144)])),
+             (&#39;BatchNorm2d-70&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;ReLU-71&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-72&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 1024, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 524288)])),
+             (&#39;BatchNorm2d-73&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 1024, 28, 28]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-74&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 1024, 28, 28]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-75&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-76&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-77&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-78&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-79&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;Conv2d-80&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512, 28, 28]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 524288)])),
+             (&#39;BatchNorm2d-81&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-82&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-83&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-84&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-85&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-86&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-87&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-88&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-89&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-90&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-91&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-92&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-93&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-94&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-95&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-96&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-97&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-98&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-99&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-100&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-101&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-102&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-103&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-104&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-105&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-106&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-107&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-108&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-109&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-110&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-111&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-112&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-113&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-114&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-115&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-116&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-117&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-118&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-119&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-120&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-121&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-122&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-123&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-124&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-125&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-126&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-127&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-128&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-129&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-130&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-131&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-132&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-133&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-134&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-135&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-136&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-137&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-138&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-139&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-140&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-141&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-142&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-143&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-144&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-145&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-146&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-147&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-148&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-149&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-150&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-151&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-152&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-153&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-154&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-155&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-156&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-157&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-158&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-159&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-160&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-161&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-162&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-163&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-164&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-165&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-166&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-167&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-168&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-169&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-170&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-171&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-172&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-173&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-174&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-175&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-176&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-177&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-178&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-179&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-180&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-181&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-182&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-183&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-184&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-185&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-186&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-187&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-188&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-189&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-190&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-191&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-192&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-193&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-194&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-195&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-196&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-197&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-198&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-199&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-200&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-201&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-202&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-203&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-204&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-205&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-206&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-207&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-208&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-209&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-210&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-211&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-212&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-213&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-214&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-215&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-216&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-217&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-218&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-219&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-220&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-221&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-222&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-223&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-224&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-225&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-226&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-227&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-228&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-229&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-230&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-231&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-232&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-233&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-234&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-235&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-236&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-237&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-238&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-239&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-240&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-241&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-242&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-243&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-244&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-245&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-246&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-247&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-248&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-249&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-250&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-251&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-252&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-253&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-254&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-255&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-256&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-257&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-258&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-259&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-260&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-261&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-262&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-263&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-264&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-265&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-266&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-267&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-268&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-269&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-270&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-271&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-272&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-273&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-274&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-275&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 147456)])),
+             (&#39;BatchNorm2d-276&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-277&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-278&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 1048576)])),
+             (&#39;BatchNorm2d-279&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2048)])),
+             (&#39;ReLU-280&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-281&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 2048, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2097152)])),
+             (&#39;BatchNorm2d-282&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 2048, 14, 14]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4096)])),
+             (&#39;ReLU-283&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 2048, 14, 14]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-284&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 589824)])),
+             (&#39;BatchNorm2d-285&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4096)])),
+             (&#39;ReLU-286&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-287&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4194304)])),
+             (&#39;BatchNorm2d-288&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4096)])),
+             (&#39;Conv2d-289&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 1024, 14, 14]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 2097152)])),
+             (&#39;BatchNorm2d-290&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4096)])),
+             (&#39;ReLU-291&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-292&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4194304)])),
+             (&#39;BatchNorm2d-293&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4096)])),
+             (&#39;ReLU-294&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-295&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 589824)])),
+             (&#39;BatchNorm2d-296&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4096)])),
+             (&#39;ReLU-297&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-298&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4194304)])),
+             (&#39;BatchNorm2d-299&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4096)])),
+             (&#39;ReLU-300&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-301&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4194304)])),
+             (&#39;BatchNorm2d-302&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4096)])),
+             (&#39;ReLU-303&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-304&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 589824)])),
+             (&#39;BatchNorm2d-305&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4096)])),
+             (&#39;ReLU-306&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Conv2d-307&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4194304)])),
+             (&#39;BatchNorm2d-308&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;trainable&#39;, False),
+                           (&#39;nb_params&#39;, 4096)])),
+             (&#39;ReLU-309&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;AdaptiveMaxPool2d-310&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 1, 1]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;AdaptiveAvgPool2d-311&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 2048, 1, 1]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;AdaptiveConcatPool2d-312&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 2048, 7, 7]),
+                           (&#39;output_shape&#39;, [-1, 4096, 1, 1]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Flatten-313&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 4096, 1, 1]),
+                           (&#39;output_shape&#39;, [-1, 4096]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;BatchNorm1d-314&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 4096]),
+                           (&#39;output_shape&#39;, [-1, 4096]),
+                           (&#39;trainable&#39;, True),
+                           (&#39;nb_params&#39;, 8192)])),
+             (&#39;Dropout-315&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 4096]),
+                           (&#39;output_shape&#39;, [-1, 4096]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Linear-316&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 4096]),
+                           (&#39;output_shape&#39;, [-1, 512]),
+                           (&#39;trainable&#39;, True),
+                           (&#39;nb_params&#39;, 2097664)])),
+             (&#39;ReLU-317&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512]),
+                           (&#39;output_shape&#39;, [-1, 512]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;BatchNorm1d-318&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512]),
+                           (&#39;output_shape&#39;, [-1, 512]),
+                           (&#39;trainable&#39;, True),
+                           (&#39;nb_params&#39;, 1024)])),
+             (&#39;Dropout-319&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512]),
+                           (&#39;output_shape&#39;, [-1, 512]),
+                           (&#39;nb_params&#39;, 0)])),
+             (&#39;Linear-320&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 512]),
+                           (&#39;output_shape&#39;, [-1, 120]),
+                           (&#39;trainable&#39;, True),
+                           (&#39;nb_params&#39;, 61560)])),
+             (&#39;LogSoftmax-321&#39;,
+              OrderedDict([(&#39;input_shape&#39;, [-1, 120]),
+                           (&#39;output_shape&#39;, [-1, 120]),
+                           (&#39;nb_params&#39;, 0)]))])</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.fit(1e-2, 3, cycle_len=1)
+
+epoch      trn_loss   val_loss   accuracy
+    0      0.305846   0.235867   0.920744
+    1      0.299647   0.23352    0.921233
+    2      0.289628   0.227065   0.930039HBox(children=(IntProgress(value=0, description=&#39;Epoch&#39;, max=3), HTML(value=&#39;&#39;)))
+
+[array([0.22706]), 0.9300391445421192]</code></pre>
+<p>Validation loss is much lower than training loss. This is a sign of underfitting. Cycle_len=1 may be too short. Let’s set cycle_mult=2 to find better parameter.</p>
+<pre class="python"><code>&gt;&gt;&gt; # When you are under fitting, it means cycle_len=1 is too short (learning rate is getting reset before it had the chance to zoom in properly).
+... learn.fit(1e-2, 3, cycle_len=1, cycle_mult=2) # 1+2+4 = 7 epochs
+
+epoch      trn_loss   val_loss   accuracy
+    0      0.277726   0.228235   0.928571
+    1      0.277173   0.226656   0.926125
+    2      0.253997   0.227697   0.927104
+    3      0.271757   0.224233   0.925147
+    4      0.230842   0.222551   0.92955
+    5      0.208118   0.219519   0.926614
+    6      0.202431   0.219084   0.926614HBox(children=(IntProgress(value=0, description=&#39;Epoch&#39;, max=7), HTML(value=&#39;&#39;)))
+
+[array([0.21908]), 0.9266144826337549]</code></pre>
+<p>Training loss and validation loss are getting closer and smaller. We are on right track.</p>
+<pre class="python"><code>&gt;&gt;&gt; log_preds, y = learn.TTA() # (5, 2044, 120), (2044,)
+&gt;&gt;&gt; probs = np.mean(np.exp(log_preds),0)
+&gt;&gt;&gt; accuracy_np(probs, y), metrics.log_loss(y, probs)
+
+(0.9275929549902152, 0.2275370965892022)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; len(data.val_ds.y), data.val_ds.y[:5]
+(2044, array([19, 15,  7, 99, 73]))</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.save(&#39;299_pre&#39;)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.load(&#39;299_pre&#39;)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.fit(1e-2, 1, cycle_len=2) # 1+1 = 2 epochs
+
+epoch      trn_loss   val_loss   accuracy
+    0      0.222951   0.221953   0.929061
+    1      0.204473   0.220221   0.925636HBox(children=(IntProgress(value=0, description=&#39;Epoch&#39;, max=2), HTML(value=&#39;&#39;)))
+
+[array([0.22022]), 0.9256360085276475]</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.save(&#39;299_pre&#39;)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; log_preds, y = learn.TTA()
+&gt;&gt;&gt; probs = np.mean(np.exp(log_preds),0)
+&gt;&gt;&gt; accuracy_np(probs, y), metrics.log_loss(y, probs)
+
+(0.9290606653620352, 0.22978208749521115)</code></pre>
+<p>This dataset is so similar to ImageNet dataset. Training convolution layers doesn’t help much. We are not going to unfreeze.</p>
+</div>
+<div id="create-submission" class="section level2">
+<h2>Create submission</h2>
+<p><a href="https://youtu.be/9C06ZPF8Uuc?t=1905" class="uri">https://youtu.be/9C06ZPF8Uuc?t=1905</a></p>
+<pre class="python"><code>&gt;&gt;&gt; data.classes
+[&#39;affenpinscher&#39;,
+ &#39;afghan_hound&#39;,
+ &#39;african_hunting_dog&#39;,
+ &#39;airedale&#39;,
+ &#39;american_staffordshire_terrier&#39;,
+ &#39;appenzeller&#39;,
+ &#39;australian_terrier&#39;,
+ &#39;basenji&#39;,
+ &#39;basset&#39;,
+ &#39;beagle&#39;,
+ &#39;bedlington_terrier&#39;,
+ &#39;bernese_mountain_dog&#39;,
+ &#39;black-and-tan_coonhound&#39;,
+ &#39;blenheim_spaniel&#39;,
+ &#39;bloodhound&#39;,
+ &#39;bluetick&#39;,
+ &#39;border_collie&#39;,
+ &#39;border_terrier&#39;,
+ &#39;borzoi&#39;,
+ &#39;boston_bull&#39;,
+ &#39;bouvier_des_flandres&#39;,
+ &#39;boxer&#39;,
+ &#39;brabancon_griffon&#39;,
+ &#39;briard&#39;,
+ &#39;brittany_spaniel&#39;,
+ &#39;bull_mastiff&#39;,
+ &#39;cairn&#39;,
+ &#39;cardigan&#39;,
+ &#39;chesapeake_bay_retriever&#39;,
+ &#39;chihuahua&#39;,
+ &#39;chow&#39;,
+ &#39;clumber&#39;,
+ &#39;cocker_spaniel&#39;,
+ &#39;collie&#39;,
+ &#39;curly-coated_retriever&#39;,
+ &#39;dandie_dinmont&#39;,
+ &#39;dhole&#39;,
+ &#39;dingo&#39;,
+ &#39;doberman&#39;,
+ &#39;english_foxhound&#39;,
+ &#39;english_setter&#39;,
+ &#39;english_springer&#39;,
+ &#39;entlebucher&#39;,
+ &#39;eskimo_dog&#39;,
+ &#39;flat-coated_retriever&#39;,
+ &#39;french_bulldog&#39;,
+ &#39;german_shepherd&#39;,
+ &#39;german_short-haired_pointer&#39;,
+ &#39;giant_schnauzer&#39;,
+ &#39;golden_retriever&#39;,
+ &#39;gordon_setter&#39;,
+ &#39;great_dane&#39;,
+ &#39;great_pyrenees&#39;,
+ &#39;greater_swiss_mountain_dog&#39;,
+ &#39;groenendael&#39;,
+ &#39;ibizan_hound&#39;,
+ &#39;irish_setter&#39;,
+ &#39;irish_terrier&#39;,
+ &#39;irish_water_spaniel&#39;,
+ &#39;irish_wolfhound&#39;,
+ &#39;italian_greyhound&#39;,
+ &#39;japanese_spaniel&#39;,
+ &#39;keeshond&#39;,
+ &#39;kelpie&#39;,
+ &#39;kerry_blue_terrier&#39;,
+ &#39;komondor&#39;,
+ &#39;kuvasz&#39;,
+ &#39;labrador_retriever&#39;,
+ &#39;lakeland_terrier&#39;,
+ &#39;leonberg&#39;,
+ &#39;lhasa&#39;,
+ &#39;malamute&#39;,
+ &#39;malinois&#39;,
+ &#39;maltese_dog&#39;,
+ &#39;mexican_hairless&#39;,
+ &#39;miniature_pinscher&#39;,
+ &#39;miniature_poodle&#39;,
+ &#39;miniature_schnauzer&#39;,
+ &#39;newfoundland&#39;,
+ &#39;norfolk_terrier&#39;,
+ &#39;norwegian_elkhound&#39;,
+ &#39;norwich_terrier&#39;,
+ &#39;old_english_sheepdog&#39;,
+ &#39;otterhound&#39;,
+ &#39;papillon&#39;,
+ &#39;pekinese&#39;,
+ &#39;pembroke&#39;,
+ &#39;pomeranian&#39;,
+ &#39;pug&#39;,
+ &#39;redbone&#39;,
+ &#39;rhodesian_ridgeback&#39;,
+ &#39;rottweiler&#39;,
+ &#39;saint_bernard&#39;,
+ &#39;saluki&#39;,
+ &#39;samoyed&#39;,
+ &#39;schipperke&#39;,
+ &#39;scotch_terrier&#39;,
+ &#39;scottish_deerhound&#39;,
+ &#39;sealyham_terrier&#39;,
+ &#39;shetland_sheepdog&#39;,
+ &#39;shih-tzu&#39;,
+ &#39;siberian_husky&#39;,
+ &#39;silky_terrier&#39;,
+ &#39;soft-coated_wheaten_terrier&#39;,
+ &#39;staffordshire_bullterrier&#39;,
+ &#39;standard_poodle&#39;,
+ &#39;standard_schnauzer&#39;,
+ &#39;sussex_spaniel&#39;,
+ &#39;tibetan_mastiff&#39;,
+ &#39;tibetan_terrier&#39;,
+ &#39;toy_poodle&#39;,
+ &#39;toy_terrier&#39;,
+ &#39;vizsla&#39;,
+ &#39;walker_hound&#39;,
+ &#39;weimaraner&#39;,
+ &#39;welsh_springer_spaniel&#39;,
+ &#39;west_highland_white_terrier&#39;,
+ &#39;whippet&#39;,
+ &#39;wire-haired_fox_terrier&#39;,
+ &#39;yorkshire_terrier&#39;]</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; data.test_ds.fnames
+[&#39;test/860409613c002d1684659434cc3b7815.jpg&#39;,
+ &#39;test/7795a99884e3f65bac0c6b15222d0bef.jpg&#39;,
+ &#39;test/25053d29f6d11cb31bfa35365d81bf08.jpg&#39;,
+ &#39;test/b0c5944458dafe3ba68b7021da55fb12.jpg&#39;,
+ &#39;test/bc1e84bb1a43564b86195324f6127788.jpg&#39;,
+ &#39;test/f453249b8fff37e92e02fce0d662ffa0.jpg&#39;,
+ &#39;test/7b515441a949734129df07dfe3a2ad37.jpg&#39;,
+
+ ...]</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; log_preds, y = learn.TTA(is_test=True) # use test dataset rather than validation dataset
+&gt;&gt;&gt; probs = np.mean(np.exp(log_preds),0)
+&gt;&gt;&gt; #accuracy_np(probs, y), metrcs.log_loss(y, probs) # This does not make sense since test dataset has no labels</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; probs.shape # (n_images, n_classes)
+(10357, 120)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; df = pd.DataFrame(probs)
+&gt;&gt;&gt; df.columns = data.classes</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; df.insert(0, &#39;id&#39;, [o[5:-4] for o in data.test_ds.fnames])</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; df.head()
+                                 id  affenpinscher  afghan_hound  \
+0  860409613c002d1684659434cc3b7815   1.033523e-07  1.222217e-07
+1  7795a99884e3f65bac0c6b15222d0bef   1.435922e-05  6.932197e-06
+2  25053d29f6d11cb31bfa35365d81bf08   5.264800e-07  1.446194e-07
+3  b0c5944458dafe3ba68b7021da55fb12   2.881566e-05  1.302903e-03
+4  bc1e84bb1a43564b86195324f6127788   5.965018e-07  2.727867e-07
+
+   african_hunting_dog      airedale  american_staffordshire_terrier  \
+0         8.276549e-07  1.612212e-07                    1.165397e-05
+1         1.345710e-04  6.235646e-06                    1.018638e-06
+2         1.949651e-07  1.092023e-08                    5.545044e-08
+3         1.580490e-05  2.183882e-05                    2.693081e-06
+4         2.457161e-07  5.483522e-07                    2.855581e-06
+
+    appenzeller  australian_terrier       basenji        basset  \
+0  2.141374e-06        1.174687e-07  4.318561e-05  2.067169e-07
+1  2.645235e-07        4.785739e-07  1.877891e-07  2.687487e-06
+2  1.068558e-07        1.298993e-08  2.252071e-08  1.778714e-08
+3  1.087829e-05        7.497424e-05  3.952463e-06  3.280814e-06
+4  6.297004e-06        3.775013e-07  4.234002e-06  5.744411e-07
+
+         ...            toy_poodle   toy_terrier        vizsla  walker_hound  \
+0        ...          5.686984e-06  4.346751e-05  6.187195e-07  1.110427e-07
+1        ...          1.808797e-06  4.939812e-07  6.492081e-06  5.690324e-07
+2        ...          5.585883e-07  1.862536e-07  7.328974e-08  9.110289e-09
+3        ...          9.443202e-06  2.685446e-04  2.065725e-05  3.238936e-05
+4        ...          1.416370e-06  2.823057e-06  6.739015e-07  2.646057e-06
+
+     weimaraner  welsh_springer_spaniel  west_highland_white_terrier  \
+0  3.252912e-07            9.449318e-09                 3.144665e-06
+1  1.740363e-06            1.387936e-05                 7.654214e-07
+2  4.455980e-08            1.746896e-07                 1.117296e-07
+3  1.029117e-05            1.976677e-05                 2.855911e-05
+4  5.905487e-06            1.744491e-07                 1.136646e-05
+
+        whippet  wire-haired_fox_terrier  yorkshire_terrier
+0  8.608926e-06             4.493721e-08       1.511220e-07
+1  2.113993e-06             1.077146e-06       1.102693e-07
+2  5.918011e-08             1.845020e-07       6.097144e-08
+3  5.299530e-04             1.732564e-03       4.113853e-05
+4  1.302851e-06             1.799933e-05       2.836661e-08
+
+[5 rows x 121 columns]</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; SUBM = f&#39;{PATH}/subm/&#39;
+&gt;&gt;&gt; os.makedirs(SUBM, exist_ok=True)
+&gt;&gt;&gt; df.to_csv(f&#39;{SUBM}subm.gz&#39;, compression=&#39;gzip&#39;, index=False)</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; FileLink(f&#39;{SUBM}subm.gz&#39;)
+/data/fastai/dogbreeds/subm/subm.gz</code></pre>
+</div>
+<div id="individual-prediction" class="section level2">
+<h2>Individual prediction</h2>
+<pre class="python"><code>&gt;&gt;&gt; fn = data.val_ds.fnames[0]
+&gt;&gt;&gt; fn
+&#39;train/000bec180eb18c7604dcecc8fe0dba07.jpg&#39;</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; Image.open(PATH + fn).resize((150, 150))
+&lt;PIL.Image.Image image mode=RGB size=150x150 at 0x7F0D78AA0898&gt;</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; # Method 1.
+... trn_tfms, val_tfms = tfms_from_model(arch, sz)
+&gt;&gt;&gt; ds = FilesIndexArrayDataset([fn], np.array([1]), val_tfms, PATH)
+&gt;&gt;&gt; dl = DataLoader(ds)
+&gt;&gt;&gt; preds = learn.predict_dl(dl)
+&gt;&gt;&gt; np.argmax(preds)
+19</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; learn.data.classes[np.argmax(preds)]
+&#39;boston_bull&#39;</code></pre>
+<pre class="python"><code>&gt;&gt;&gt; # Method 2.
+... trn_tfms, val_tfms = tfms_from_model(arch, sz)
+&gt;&gt;&gt; im = val_tfms(open_image(PATH + fn)) # open_image() returns numpy.ndarray
+&gt;&gt;&gt; preds = learn.predict_array(im[None])
+&gt;&gt;&gt; np.argmax(preds)
+19</code></pre>
+</div>
+</div>
+
+				</main>
+				<footer class="footer">
+					
+					
+				</footer>
+			</article>
+			<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+    
+    
+    if (window.location.hostname == "localhost")
+        return;
+
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    var disqus_shortname = 'njisyd';
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</main>
+				<aside class="sidebar">
+			<div class="container sidebar-sticky">
+				<header class="sidebar-about h-card vcard p-author">
+					
+					<a class="u-url u-uid" rel="me" href="../../../../">
+						<img class="u-photo" src="../../../../author.jpg" width=128 height=128 />
+					</a>
+					
+
+					
+					<span class="site-title u-name fn">
+					  <a class="u-url u-uid" rel="me" href="../../../../">The Future Has Arrived</a>
+				  </span>
+					
+
+					<p class="lead p-note">
+						 data science, behavioural finance and the rise of machines 
+					</p>
+
+					<nav>
+						<ul class="sidebar-nav">
+							
+							<li><a href="../../../../post/"> Posts </a></li>
+							
+						</ul>
+					</nav>
+
+					
+						<aside class="contact">
+						  
+							  <h3 class="contact-head">Contact Me</h3>
+						  
+							<ul class="contact-list">
+								
+								<li>
+									
+									  
+		  						    <i class='fa fa-github fa-fw'></i>
+		  						  
+		  							<a href="https://github.com/nji-syd" class="u-url url" rel="me">
+		  							  GitHub
+		  							</a>
+								
+								</li>
+								
+								<li>
+									
+									  
+		  						    <i class='fa fa-linkedin fa-fw'></i>
+		  						  
+		  							<a href="https://linkedin.com/in/nickirelandau" class="u-url url" rel="me">
+		  							  LinkedIn
+		  							</a>
+								
+								</li>
+								
+							</ul>
+						</aside>
+					
+				</header>
+
+				<footer>&copy; 2018. All rights reserved. </footer>
+			</div>
+		</aside>
+
+		  <footer>
+  
+  
+  
+  
+
+  <script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+  
+  
+  
+  <script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+  <script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+  <script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+  
+
+ 
+  
+<script src="../../../../js/math-code.js"></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    processEscapes: true
+  }
+});
+</script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+  
+  </footer>
+  </body>
+</html>
+
+	</body>
+</html>

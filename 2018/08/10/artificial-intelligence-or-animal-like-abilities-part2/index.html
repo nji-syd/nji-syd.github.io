@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en-US">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+
+		
+		<title>Artificial Intelligence or Human Like Abilities - Part 2 &middot; The Future Has Arrived</title>
+		
+
+		
+			
+		
+
+		
+
+		
+		
+
+		
+
+		<link rel="stylesheet" href="../../../../font-awesome/css/font-awesome.min.css" type="text/css">
+		<link rel="stylesheet" href="../../../../css/poole.css">
+		<link rel="stylesheet" href="../../../../css/syntax.css">
+		<link rel="stylesheet" href="../../../../css/hyde.css">
+		
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="The Future Has Arrived">
+		<link href="../../../../2018/08/10/artificial-intelligence-or-animal-like-abilities-part2" rel="canonical">
+	</head>
+
+	<body class="  h-entry">
+		<main class="content container" role="main">
+			<article class="post">
+				<header>
+					<a class="u-url" href="../../../../2018/08/10/artificial-intelligence-or-animal-like-abilities-part2">
+						<h1 class="post-title p-name">Artificial Intelligence or Human Like Abilities - Part 2</h1>
+					</a>
+					<time class="post-date dt-published" datetime="2018-08-10T00:00:00Z">Friday, 10 August 2018</time>
+				</header>
+				<main class="post-content e-content">
+					<div id="artificial-intelligence-or-animal-like-abilities---part-2" class="section level2">
+<h2>Artificial Intelligence or Animal Like Abilities - Part 2</h2>
+<p>In Part one of this series we saw how to</p>
+<p>Recently there seems to be an escalation of hype around AI. One recent article by Nan Li entitled, <a href="https://worldpositive.com/the-new-intelligence-e3e1ff697f11">The New Intelligence</a> starts like this</p>
+<blockquote>
+<h4 id="modern-ai-and-the-fundamental-undoing-of-the-scientific-method">Modern AI and the fundamental undoing of the scientific method</h4>
+<p><em>The days of traditional, human-driven problem solving — developing a hypothesis, uncovering principles, and testing that hypothesis through deduction, logic, and experimentation — may be coming to an end. A confluence of factors (large data sets, step-change infrastructure, algorithms, and computational resources) are moving us toward an entirely new type of discovery, one that sits far beyond the constraints of human-like logic or decision-making: driven solely by AI, rooted in radical empiricism. The implications — from how we celebrate scientific discovery to assigning moral responsibility to those discoveries — are far-reaching.</em></p>
+</blockquote>
+<p>I share this passage because it embodies some of the popularist trends in thinking about AI, namely:</p>
+<ul>
+<li>Human driven problem solving is becoming less important.</li>
+<li>Machine learning tools can automatically make sense of the data and provide knowledge.</li>
+<li>That somehow we already have achieved strong AI</li>
+</ul>
+<p>It is true that in some contexts, including the image classification model we build below, machine learning can take large quantities of unstructured data with little human help and answer useful queries such as <em>which breed of dog is this?</em> or <em>does the CT scan indicate a tumour?</em> And these answers are often better than human level performance. As significant as these breakthroughs are, these problems are typically about correlating unstructured inputs (pixels, text, audio) with associated outputs. Reasoning about the world, or making sense of structured data is a very different challenge.</p>
+<p>The limitations of the data centric approach are discussed by <a href="https://en.wikipedia.org/wiki/Judea_Pearl">Judea Pearl</a> in his latest book <a href="https://www.amazon.com/Book-Why-Science-Cause-Effect/dp/046509760X/">The Book of Why</a>. Pearl, one of the pioneers of Bayesian Networks, points out that much of our knowledge as humans is based on causal understanding rather than mere data or facts. He identifies three levels of causal sophistication, placing modern techniques such as deep learning on the lowest rung (association):</p>
+<ol style="list-style-type: decimal">
+<li><strong>Association</strong>: The level of seeing and observing. How would seeing X change my belief in Y?</li>
+<li><strong>Intervention</strong>: The level of doing and intervening. What would Y be if I do X?</li>
+<li><strong>Imagining</strong>: The level of retrospection and understanding. What if X had not occurred? What if I had acted differently?</li>
+</ol>
+<p><del>The distinction between levels one and two is, 1. the probability of Y given X, denoted P ( Y | X ) as compared with 2. the probability of Y given I do X, denoted P ( Y | do(X)). This is a subtle but critical distinction as we will see later.</del></p>
+<p>In the words of Pearl:</p>
+<blockquote>
+<p>Some readers may be surprised to see that I have placed present-day learning machines squarely on rung one of the Ladder of Causation, sharing the wisdom of an owl. We hear almost every day, it seems, about rapid advances in machine learing systems–self-driving cars, speech-recognition systems, and, especially in recent years, deep-learning algorithms (or deep neural networks). How could they still be only at level one?</p>
+<p>The successes of deep learning have been truly remarkable and have caught many of us by surprise. Nevertheless, deep learning has succeeded primarily by showing that certain questions or tasks we thought were difficult are in fact not. It has not addressed the truly difficult questions that continue to prevent us from achieving humanlike AI. As a result the public believes that “strong AI”, machines that think like humans, is just around the corner or maybe even here already. In reality nothing could be further from the truth.</p>
+</blockquote>
+<p>Are the tasks addressed by deep learning not difficult? Let’s take a closer look at what deep learning can do.</p>
+</div>
+
+				</main>
+				<footer class="footer">
+					
+					
+				</footer>
+			</article>
+			<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+    
+    
+    if (window.location.hostname == "localhost")
+        return;
+
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    var disqus_shortname = 'njisyd';
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</main>
+				<aside class="sidebar">
+			<div class="container sidebar-sticky">
+				<header class="sidebar-about h-card vcard p-author">
+					
+					<a class="u-url u-uid" rel="me" href="../../../../">
+						<img class="u-photo" src="../../../../author.jpg" width=128 height=128 />
+					</a>
+					
+
+					
+					<span class="site-title u-name fn">
+					  <a class="u-url u-uid" rel="me" href="../../../../">The Future Has Arrived</a>
+				  </span>
+					
+
+					<p class="lead p-note">
+						 data science, behavioural finance and the rise of machines 
+					</p>
+
+					<nav>
+						<ul class="sidebar-nav">
+							
+							<li><a href="../../../../post/"> Posts </a></li>
+							
+						</ul>
+					</nav>
+
+					
+						<aside class="contact">
+						  
+							  <h3 class="contact-head">Contact Me</h3>
+						  
+							<ul class="contact-list">
+								
+								<li>
+									
+									  
+		  						    <i class='fa fa-github fa-fw'></i>
+		  						  
+		  							<a href="https://github.com/nji-syd" class="u-url url" rel="me">
+		  							  GitHub
+		  							</a>
+								
+								</li>
+								
+								<li>
+									
+									  
+		  						    <i class='fa fa-linkedin fa-fw'></i>
+		  						  
+		  							<a href="https://linkedin.com/in/nickirelandau" class="u-url url" rel="me">
+		  							  LinkedIn
+		  							</a>
+								
+								</li>
+								
+							</ul>
+						</aside>
+					
+				</header>
+
+				<footer>&copy; 2018. All rights reserved. </footer>
+			</div>
+		</aside>
+
+		  <footer>
+  
+  
+ 
+  
+
+  
+  </footer>
+  </body>
+</html>
+
+	</body>
+</html>

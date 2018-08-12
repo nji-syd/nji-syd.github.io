@@ -6,10 +6,29 @@
     <description>Recent content in Posts on The Future Has Arrived</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 30 May 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 13 Aug 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>How Dumb is Your Data?</title>
+      <link>/2018/08/13/how-dumb-is-your-data/</link>
+      <pubDate>Mon, 13 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/13/how-dumb-is-your-data/</guid>
+      <description>Recently there seems to be an escalation of hype around AI. One recent article by Nan Li entitled, The New Intelligence starts like this
+ Modern AI and the fundamental undoing of the scientific method The days of traditional, human-driven problem solving — developing a hypothesis, uncovering principles, and testing that hypothesis through deduction, logic, and experimentation — may be coming to an end. A confluence of factors (large data sets, step-change infrastructure, algorithms, and computational resources) are moving us toward an entirely new type of discovery, one that sits far beyond the constraints of human-like logic or decision-making: driven solely by AI, rooted in radical empiricism.</description>
+    </item>
+    
+    <item>
+      <title>Human Like Abilities - In 30 Lines of Code</title>
+      <link>/2018/08/10/human-like-abilities-in-30-lines-of-code/</link>
+      <pubDate>Fri, 10 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/10/human-like-abilities-in-30-lines-of-code/</guid>
+      <description>Recent advances in deep learning have invigorated interest in data driven AI. Previous solutions to problems involving hand crafted features have been replaced by algorithms which take care of these steps for us – promoting data driven methods to a new level of radical empiricism. And the results can be pretty amazing. In part one of this series we’ll build a deep learning neural network for image classification in 30 lines of python code.</description>
+    </item>
     
     <item>
       <title>An Introduction To The Boostrap For Quantitative Stock Selection</title>

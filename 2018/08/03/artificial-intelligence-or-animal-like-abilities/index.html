@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en-US">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+
+		
+		<title>Artificial Intelligence or Animal Like Abilities - Part 1 &middot; The Future Has Arrived</title>
+		
+
+		
+			
+		
+
+		
+
+		
+		
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/atom-one-light.min.css' rel='stylesheet' type='text/css' />
+
+
+
+		
+
+		<link rel="stylesheet" href="../../../../font-awesome/css/font-awesome.min.css" type="text/css">
+		<link rel="stylesheet" href="../../../../css/poole.css">
+		<link rel="stylesheet" href="../../../../css/syntax.css">
+		<link rel="stylesheet" href="../../../../css/hyde.css">
+		
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="The Future Has Arrived">
+		<link href="../../../../2018/08/03/artificial-intelligence-or-animal-like-abilities" rel="canonical">
+	</head>
+
+	<body class="  h-entry">
+		<main class="content container" role="main">
+			<article class="post">
+				<header>
+					<a class="u-url" href="../../../../2018/08/03/artificial-intelligence-or-animal-like-abilities">
+						<h1 class="post-title p-name">Artificial Intelligence or Animal Like Abilities - Part 1</h1>
+					</a>
+					<time class="post-date dt-published" datetime="2018-08-03T00:00:00Z">Friday, 3 August 2018</time>
+				</header>
+				<main class="post-content e-content">
+					<p>We’ve seen great fanfare recently for progress in Artificial Intelligence (AI) and what it can now do. In part one of this series we’ll build a deep learning neural network for image classification in 30 lines of python code. These types of models are now outperforming human experts in a range of fields. What are the implications of this new type of AI? While trying to not make things too technical, it’s useful to look at an example for a couple of reasons. Firstly, to show what we can now do in just a few lines of python code. Secondly, I hope that running through the steps will allow you to witness the results first hand. And thirdly, examples are a great way to understand what’s going on.</p>
+<p>As impressive (and now easy to use) as this technology is, it’s worth considering the limitations of machine learning and big data to serve up inference given any data we give it. Towards this end, Part 2 looks at a problem known as Simson’s paradox for which deep learning apparently has no answer. In finding answers to this problem we’ll need to take a different tack. This series is both a celebration of recent advances in deep learning and a sobering look at what those advances represent in terms of progress in AI.</p>
+<p>To be clear, researchers often distinguish between “weak” AI and “strong” AI. The former refers to machines with limited operational scope, such as classifying certain types of objects in images or playing a particular game. Strong AI refers to the intellectual capabilities we have as humans such as reasoning, planning and learning across different domains in a holistic way.</p>
+<div id="deep-learning-in-python" class="section level3">
+<h3>Deep Learning in Python</h3>
+<p>In this section we’ll use a <a href="https://github.com/facebookresearch/ResNeXt#introduction">ResNeXt-101</a> model to identify 120 breeds of dog from images. The results are quite amazing and you’ll shortly have an opportunity to go head-to-head with the computer to see what it (and you) can do! The ResNeXt architecture, developed by Facebook, is one of the latest developments in the arms race of deep learning, placing second in the 2016 ILSVRC image recognition competition. It’s new architecture is more efficent than previous designs, meaning that it can outperform networks that have more layers and more parameters<sup>1</sup>. Facebook provide a <a href="https://github.com/facebookresearch/ResNeXt#imagenet-pretrained-models">pre-trained</a> version of the neural network with all the weights already tuned on millions of images from the <a href="https://en.wikipedia.org/wiki/ImageNet">ImageNet</a> library. The rather large download size of 638 MB reflects the size of the nework. It has 44 million parameters spread across its 101 layers! Ten years ago neural networks typically had 3-5 layers. New optimization algorithms, regularization techniques and other innovations have removed the depth limitations and ushered in the deep revolution.</p>
+<div id="running-the-code" class="section level4">
+<h4>Running the Code</h4>
+<p>The code is provided in two sections, setup and training. If you want to run the code you’ll need an environment with the fast.ai library installed. Various options for doing this are discussed in lesson 1 &amp; 2 of Jeremy Howard’s <a href="http://course.fast.ai/">Practical Deep Learning</a> course. The code below is based on the lesson 2 workbook. For data we use the images provided by the <a href="https://www.kaggle.com/c/dog-breed-identification">Kaggle Dog Breed Competition</a> which consists of 10,222 labeled images for fitting a model.</p>
+</div>
+<div id="the-challenge" class="section level4">
+<h4>The Challenge</h4>
+<p>In the code below we’ve set aside 10% of the data for validation. Figure One shows 9 images randomly selected from the validation data. How many breeds can you recognise? A little later we’ll check on the answers and see how the computer did.</p>
+<p><strong>Figure One - 9 Random Dogs</strong>
+<img src="../../../../post/2018-08-04-artificial-intelligence-or-animal-like-abilities_files/dog-breeds1b.jpg" width="800" /></p>
+</div>
+<div id="deep-learning-setup" class="section level4">
+<h4>Deep Learning Setup</h4>
+<p>First up, we import the fastai library and set some parameters:</p>
+<ul>
+<li>arch: architecture selection (various architectures are supported by fastai)</li>
+<li>label_csv: a list of class labels for each dog image (for the purpose of training the neural network).</li>
+<li>val_idxs: a list of images for validation. Here we randomly set asside 10% of fitting data to measure training performance</li>
+</ul>
+<pre class="python"><code>&#39;&#39;&#39;
+import the python libraries required for deep learning
+&#39;&#39;&#39;
+from fastai.imports import *
+from fastai.torch_imports import *
+from fastai.transforms import *
+from fastai.conv_learner import *
+from fastai.model import *
+from fastai.dataset import *
+from fastai.sgdr import *
+from fastai.plots import *</code></pre>
+<pre class="python"><code>&#39;&#39;&#39;
+initialization
+&#39;&#39;&#39;
+PATH = &quot;/data/fastai/dogbreeds/&quot;
+arch = resnext101_64
+label_csv = f&#39;{PATH}labels.csv&#39;
+n = len(list(open(label_csv))) - 1 # header is not counted (-1)
+val_idxs = get_cv_idxs(n,val_pct=0.1) # random 10% data for validation set</code></pre>
+<p>The code block below provides a helper function for getting the data and creates the model. The <em>tfms_from_model</em> function transforms each image randomly, including cropping, slightly rotating the image, readjusting the lighting, randomly flipping (mirroring) the image and zooming in. The idea here is that for each pass of the training set the neural network will see small variatons in the same image. This helps with learning as we want the model to avoid memorizing the data set and instead learn to recognise the key characteristics of each breed. In other words we want the model to be able to generalize on dog images it has never seen before.</p>
+<p>Finally the call to the <em>ConvLearner.pretrained</em> function gets the pretrained ResNeXt model and modifies it for the data set provided. In this case we have 120 dog breeds, so we’ll need to replace the existing output layer with a new one which has 120 output units (each output will produce a probability for the associated breed of dog). The parameter <em>xtra_fc=[2048,512]</em> asks for 2 fully connected layers of size 2048 and 512 to be added before output. We’ve also set the <a href="https://en.wikipedia.org/wiki/Convolutional_neural_network#Dropout">dropout</a> parameters <em>ps=[0.5,0.5,0.4]</em> to guard against overfitting. That’s it for setup, next up we can train the new model on the dog images.</p>
+<pre class="python"><code>&#39;&#39;&#39;
+get data and pre-trained model
+&#39;&#39;&#39;
+def get_data(sz, bs): # sz: image size, bs: batch size
+    tmfs = tfms_from_model(arch, sz, aug_tfms=transforms_side_on, max_zoom=1.1)
+    data = ImageClassifierData.from_csv(PATH, &#39;train&#39;, f&#39;{PATH}labels.csv&#39;, test_name=&#39;test&#39;,
+                                       val_idxs=val_idxs, suffix=&#39;.jpg&#39;, tfms=tfms, bs=bs)
+    
+    return data
+    
+data = get_data(sz, bs)
+learn = ConvLearner.pretrained(arch, data, precompute=True, xtra_fc=[2048,512],ps=[0.5,0.5,0.4])</code></pre>
+</div>
+<div id="training-the-deep-neural-network" class="section level4">
+<h4>Training the Deep Neural Network</h4>
+<p>In the setup stage we took a pretrained ResNeXt model, chopped the end off it and added some custom layers in place. During this step the <em>ConvLearner.pretrained</em> function also froze all the weights of the pretrained model. This means that when we call <em>learn.fit</em> in the code below, we’re only training the final custom layers and leaving all the pretrained layers as they are. This works well in this case because the pretrained model is based on the ImageNet library which includes lots of images of the natural environment, including animals such as dogs. For this reason we don’t <em>fine tune</em> the pretrained layers, although this is often helpful.</p>
+<pre class="python"><code>&#39;&#39;&#39; 
+training Phase 1 - use precomputed activations 
+&#39;&#39;&#39;
+learn.fit(lrs=0.01, n_cycle=25, cycle_len=1)
+&#39;&#39;&#39; 
+training Phase 2 - turn off precompute to use augmentation 
+&#39;&#39;&#39;
+learn.precompute = False
+learn.set_data(get_data(sz=244, bs=177))
+learn.fit(lrs=0.01, n_cycle=10, cycle_len=1)
+learn.set_data(get_data(sz=224, bs=210))
+learn.fit(lrs=0.01, n_cycle=15, cycle_len=1)</code></pre>
+<p>Training proceeds in two phases. In Phase 1 precomputed activations are used to speed up training. Precomputing takes all the images and passes them through the pretrained layers of the network to calculate the internal neural network activations for each image. This takes a few minutes, but is only done once. For each image, the relevent activations can then be sent straight to the final layers for training. Training these last layers is super fast with 25 cycles taking less than a minute.</p>
+<p>However, recall we talked about transforming each image to improve learning. Each time the image changes, new activations are triggered. So precompute precludes working with transformations. To use transformation we turn precompute off in Phase 2. We also rescale the data to different sizes to help improve generalization and guard against overfitting.</p>
+<p>That’s it, a custom deep learning neural network in less than 30 lines of python code. Lets take a look at performance.</p>
+<pre class="python"><code>&#39;&#39;&#39; get class probabilities using test-time-augmentation (TTA) &#39;&#39;&#39;
+log_preds, y = learn.TTA()
+probs = np.mean(np.exp(log_preds),0)
+&#39;&#39;&#39; calculate validation set accuracy &#39;&#39;&#39;
+accuracy_np(probs, y), metrics.log_loss(y, probs)</code></pre>
+<p>The code above checks the accuracy on the 1,022 validation images the neural network didn’t see during training. And the result… 93.8% correct! Below are the true answers to the quiz posed earlier:</p>
+<p><img src="../../../../post/2018-08-04-artificial-intelligence-or-animal-like-abilities_files/dog-breeds2b.jpg" width="800" /></p>
+<p>How many did you get correct?</p>
+<p>If you’re like me, you’d probably rather not say. Of the 9 images above, the neural network got 8 of them correct. The computer classified the american staffordshire terrier as a staffordshire bullterrier. The notebook with all the results is embedded below, and can also be downloaded <a href="https://gist.github.com/nji-syd/04090d2b1ead019a0552ccbbcfa37029">here</a>.</p>
+<script src="https://gist.github.com/nji-syd/04090d2b1ead019a0552ccbbcfa37029.js"></script>
+<p>In the last five years deep learning has become increasingly accessable not to mention performant. It’s almost tempting to take it for granted. But with a few lines of code we’re standing on the shoulders of giants in terms of the thousands of researchers and millions of dollars spent making the breakthroughs necessary to get us to this point.</p>
+<p>In the broader context of AI, what do these human like abilities mean? To answer this questions we need to appreciate what neural networks can’t do, which is the focus of Part 2 in this series.</p>
+<p><sup>1</sup> In their <a href="https://arxiv.org/pdf/1611.05431.pdf">paper</a> the authors explain the NeXt in ResNeXt refers to the next dimmension, meaning the introduction of a cardinality dimension as an alternative to greater depth and width. The authors claim the 101 layer ResNeXt architecture outperforms a 200 layer version of the older ResNet architecture.</p>
+</div>
+</div>
+
+				</main>
+				<footer class="footer">
+					
+					
+				</footer>
+			</article>
+			<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+    
+    
+    if (window.location.hostname == "localhost")
+        return;
+
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    var disqus_shortname = 'njisyd';
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		</main>
+				<aside class="sidebar">
+			<div class="container sidebar-sticky">
+				<header class="sidebar-about h-card vcard p-author">
+					
+					<a class="u-url u-uid" rel="me" href="../../../../">
+						<img class="u-photo" src="../../../../author.jpg" width=128 height=128 />
+					</a>
+					
+
+					
+					<span class="site-title u-name fn">
+					  <a class="u-url u-uid" rel="me" href="../../../../">The Future Has Arrived</a>
+				  </span>
+					
+
+					<p class="lead p-note">
+						 data science, behavioural finance and the rise of machines 
+					</p>
+
+					<nav>
+						<ul class="sidebar-nav">
+							
+							<li><a href="../../../../post/"> Posts </a></li>
+							
+						</ul>
+					</nav>
+
+					
+						<aside class="contact">
+						  
+							  <h3 class="contact-head">Contact Me</h3>
+						  
+							<ul class="contact-list">
+								
+								<li>
+									
+									  
+		  						    <i class='fa fa-github fa-fw'></i>
+		  						  
+		  							<a href="https://github.com/nji-syd" class="u-url url" rel="me">
+		  							  GitHub
+		  							</a>
+								
+								</li>
+								
+								<li>
+									
+									  
+		  						    <i class='fa fa-linkedin fa-fw'></i>
+		  						  
+		  							<a href="https://linkedin.com/in/nickirelandau" class="u-url url" rel="me">
+		  							  LinkedIn
+		  							</a>
+								
+								</li>
+								
+							</ul>
+						</aside>
+					
+				</header>
+
+				<footer>&copy; 2018. All rights reserved. </footer>
+			</div>
+		</aside>
+
+		  <footer>
+  
+  
+  
+  
+
+  <script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+  
+  
+  
+  <script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+  <script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+  <script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/python.min.js"></script>
+  <script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+  
+
+ 
+  
+
+  
+  </footer>
+  </body>
+</html>
+
+	</body>
+</html>
