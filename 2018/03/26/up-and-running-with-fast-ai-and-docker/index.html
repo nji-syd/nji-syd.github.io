@@ -92,8 +92,7 @@
 <pre><code>FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 </code></pre></li>
 
-<li><p>The python package to interface with CUDA being cuda80 and cuda90 respectively. The Fastai python environment is created from the environment.yml file included in the Fastai github repository. To support cuda 8, we replace the cuda90 python package provided in environment.yml with the cuda80 package:</p></li>
-</ol>
+<li><p>The python package to interface with CUDA being cuda80 and cuda90 respectively. The Fastai python environment is created from the environment.yml file included in the Fastai github repository. To support cuda 8, we replace the cuda90 python package provided in environment.yml with the cuda80 package:</p>
 
 <pre><code>#           FASTAI
 
@@ -103,23 +102,25 @@ RUN git clone https://github.com/fastai/fastai.git /usr/local/fastai
 # replace cuda90 package with cuda80 for host machines supporting cuda8
 RUN sed -i -e 's/cuda90/cuda80/' /usr/local/fastai/environment.yml
 
-</code></pre>
+</code></pre></li>
+</ol>
 
 <p>When run, the docker container automatically starts the Jupyter Notebook server with a default password: fastai.</p>
 
 <p>If you need to change the password, refer to the section of the docker file titled Start Up :</p>
 
 <ol>
-<li>run the code below in a Jupyter Notebook to generate a new password key
-<code>
-from notebook.auth import passwd; passwd()
-</code></li>
-<li>use the key generated above to update the NotebookApp.password attribute in the docker file
-<code>
-NotebookApp.password='sha1:a60ff295d0b9:506732d050d4f50bfac9b6d6f37ea6b86348f4ed'&quot;
-</code>
-. rebuild the docker image. (refer to the Docker Quickstart Commands section below)</li>
-</ol>
+<li><p>run the code below in a Jupyter Notebook to generate a new password key</p>
+
+<pre><code>from notebook.auth import passwd; passwd()
+</code></pre></li>
+
+<li><p>use the key generated above to update the NotebookApp.password attribute in the docker file</p>
+
+<pre><code>NotebookApp.password='sha1:a60ff295d0b9:506732d050d4f50bfac9b6d6f37ea6b86348f4ed'&quot;
+</code></pre>
+
+<p>. rebuild the docker image. (refer to the Docker Quickstart Commands section below)</p>
 
 <pre><code>#           START UP
 
@@ -129,7 +130,8 @@ NotebookApp.password='sha1:a60ff295d0b9:506732d050d4f50bfac9b6d6f37ea6b86348f4ed
 
 CMD /bin/bash -c &quot;source activate fastai &amp;&amp; jupyter notebook --allow-root --no-browser --NotebookApp.password='sha1:a60ff295d0b9:506732d050d4f50bfac9b6d6f37ea6b86348f4ed'&quot;
 
-</code></pre>
+</code></pre></li>
+</ol>
 
 <h3 id="docker-quickstart-commands">Docker Quickstart Commands</h3>
 
@@ -316,7 +318,7 @@ RUN cd /usr/local/ML-From-Scratch &amp;&amp; /bin/bash -c &quot;source activate 
 					
 				</header>
 
-				<footer>&copy; 2018. All rights reserved. </footer>
+				<footer>&copy; 2019. All rights reserved. </footer>
 			</div>
 		</aside>
 

@@ -8,6 +8,18 @@
   </url>
   
   <url>
+    <loc>/post/</loc>
+    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/2018/08/13/how-dumb-is-your-data/</loc>
     <lastmod>2018-08-13T00:00:00+00:00</lastmod>
   </url>
@@ -15,11 +27,6 @@
   <url>
     <loc>/2018/08/10/human-like-abilities-in-30-lines-of-code/</loc>
     <lastmod>2018-08-10T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/2018/05/30/an-introduction-to-the-boostrap-for-quantitative-stock-selection/</loc>
-    <lastmod>2018-05-30T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -33,19 +40,7 @@
   </url>
   
   <url>
-    <loc>/post/</loc>
-    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/tags/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/</loc>
-    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
